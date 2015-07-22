@@ -1,0 +1,321 @@
+// Source Server Stats
+// File: webpack/main.less
+// Desc: the styles!
+
+@lightBlack: #444;
+@lighterBlack: #999;
+@lightGrey: #F7F7F7;
+@darkGrey: #D7D7D7;
+@orange: #F54B2F;
+@yellow: #FFFECC;
+@green: green;
+
+
+* {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Tahoma;
+    font-size: 14px;
+    line-height: 16px;
+    color: @lightBlack;
+}
+
+a {
+    color: @orange;
+    text-decoration: none;
+
+    &:hover {
+        color: #333;
+    }
+}
+
+.green {
+    color: @green;
+}
+
+.mg-active-datapoint, .mg-x-axis text, .mg-y-axis text {
+    font-size: 11px;
+}
+
+div#header {
+    background: @lightGrey;
+    width: 100%;
+    padding: 0 20px;
+
+    h1 {
+        display: inline-block;
+        font-weight: normal;
+        font-size: 20px;
+
+        a {
+            color: @lightBlack;
+            text-decoration: none;
+
+            &:hover {
+                color: @orange;
+            }
+        }
+    }
+
+    ul.nav {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+
+        &.right {
+            float: right;
+            margin-top: 16px;
+
+            li {
+                font-size: 14px;
+            }
+        }
+
+        li {
+            display: inline-block;
+            list-style: none;
+            font-size: 16px;
+            margin: 0 0 0 10px;
+
+            a {
+                text-decoration: none;
+                color: #888;
+
+                &.active {
+                    color: @orange;
+                }
+
+                &:hover {
+                    color: @lightBlack;
+                }
+            }
+        }
+    }
+}
+
+form.top-filters {
+    background: @lightGrey;
+    padding: 5px 0 10px 0;
+    line-height: normal;
+
+    input, select, div.Select {
+        display: inline-block;
+        font-size: 16px;
+        background: white;
+        border: none;
+        padding: 3px;
+        outline: none;
+        border-radius: 0;
+    }
+
+    > input {
+        width: 30%;
+        margin-left: 20px;
+        height: 31px;
+        padding-left: 5px;
+
+        &:focus {
+            background: @yellow;
+        }
+    }
+
+    select, div.Select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 250px;
+        margin-left: 20px;
+        float: left;
+    }
+
+    div.Select {
+        cursor: pointer;
+        height: 31px;
+
+        &.is-focused {
+            background: @yellow;
+        }
+
+        input {
+            padding: 0;
+            height: 28px;
+        }
+
+        .Select-placeholder {
+            padding-top: 3px;
+            padding-left: 3px;
+        }
+
+        .Select-control {
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+
+            &:hover {
+                box-shadow: none;
+            }
+        }
+
+        .Select-menu-outer {
+            margin-left: -3px;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            font-size: 14px;
+
+            .Select-option:hover, .Select-option.is-selected, .Select-option.is-focused {
+                background: @orange;
+                color: white;
+            }
+        }
+
+        .Select-clear {
+            padding-top: 3px;
+        }
+
+        .Select-arrow {
+            top: 11px;
+        }
+    }
+
+    span.right {
+        float: right;
+        margin-right: 20px;
+        margin-top: 7px;
+    }
+}
+
+div.content {
+    padding: 0 20px;
+    border-top: 1px dashed @darkGrey;
+}
+
+div#servers {
+    table {
+        width: 100%;
+
+        th {
+            text-align: left;
+            background: @lightGrey;
+            padding: 8px 5px;
+            border-bottom: 1px dashed @darkGrey;
+        }
+
+        td {
+            padding: 8px 5px;
+            border: 1px dashed transparent;
+            border-width: 1px 0;
+        }
+
+        tr:hover {
+            td {
+                background: @yellow;
+                border-color: @darkGrey;
+            }
+        }
+
+        tbody {
+            tr:first-child td {
+                border-top: 0;
+            }
+        }
+
+        tr {
+            td:first-child, th:first-child {
+                padding-left: 20px;
+            }
+
+            td:last-child, th:last-child {
+                padding-right: 20px;
+            }
+        }
+    }
+}
+
+div#maps, div#games {
+    ul {
+        padding: 0;
+        margin: 20px 0;
+
+        li {
+            list-style: none;
+            display: inline-block;
+            width: 30%;
+
+            a.servers-link {
+                color: @lighterBlack;
+
+                &:hover {
+                    color: @lightBlack;
+                }
+            }
+        }
+    }
+}
+
+div.page {
+    ul {
+        margin: 0 0 20px 0;
+        padding: 0;
+        float: left;
+        width: 100%;
+
+        li {
+            margin-bottom: 5px;
+            list-style: none;
+
+            &.title {
+                padding-bottom: 5px;
+                font-weight: bold;
+                border-bottom: 1px dashed @darkGrey;
+            }
+        }
+
+        &.split {
+            li {
+                float: left;
+                width: 50%;
+
+                &.title {
+                    float: none;
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    div.info {
+        float: left;
+        width: 30%;
+    }
+
+    div.history {
+        width: 65%;
+        float: left;
+        margin-left: 5%;
+
+        h3 {
+            font-weight: bold;
+            margin-bottom: 0;
+            margin-top: 20px;
+            font-size: 14px;
+            border-bottom: 1px dashed @darkGrey;
+            padding-bottom: 5px;
+
+            &:first-child {
+                margin-top: 0;
+            }
+        }
+
+        .graph {
+            margin-top: -30px;
+        }
+    }
+}
