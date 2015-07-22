@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "react/jsx-uses-react": 2,
+    "react/jsx-uses-vars": 2,
+    "react/react-in-jsx-scope": 2,
+    "quotes": [1, "single"],
+    "no-unused-vars": 2,
+    "strict": 0,
+    "curly": 0,
+    "camelcase": 0
+  },
+  "plugins": [
+    "react"
+  ]
+}
