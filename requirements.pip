@@ -1,0 +1,12 @@
+gevent==1.0.2
+
+flask==0.10.1
+flask-script==2.0.5
+
+elasticsearch==1.6.0
+elasticquery==2.1
+
+# python-valve==0.1, see: https://github.com/Holiverh/python-valve/issues/15
+git+https://github.com/Holiverh/python-valve.git@58788a54834d887b780ee5ce7ab1072a5dd6c061
+
+coloredlogs==1.0.1
