@@ -1,0 +1,44 @@
+{
+    "history": {
+        "dynamic": false,
+        "properties": {
+            "datetime": {
+                "type": "date",
+                "format": "date_hour_minute_second"
+            },
+            "server_hash": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "ping": {
+                "type": "integer"
+            },
+            "game_id": {
+                "type": "integer"
+            },
+            "gamemode": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "map": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "player_count": {
+                "type": "integer"
+            },
+            "players": {
+                "type": "nested",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "score": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}
