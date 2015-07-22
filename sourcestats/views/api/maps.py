@@ -35,8 +35,6 @@ def get_map(name):
         doc_type='history'
     )
 
-    print 'GAMES', games
-
     # Attach names
     apps = get_source_apps()
     games = [
