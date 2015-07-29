@@ -1,5 +1,9 @@
 # Source Server Stats
 
+## Deploy
+
+Manual for now - deploy directory contains a [pyinfra](https://github.com/Fizzadar/pyinfra) deploy script/inventory but uses numerous features not yet implemented in pyinfra!
+
 ## Storage
 
 Two ES indexes:
