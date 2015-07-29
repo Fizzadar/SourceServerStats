@@ -35,9 +35,7 @@ def _collect_stats(address):
 
     try:
         stats = {
-            # There is a bug in python-valve which divides the ping (in s) by 1000, rather than
-            # multiplying to get ms. https://github.com/Holiverh/python-valve/pull/20
-            'ping': (server.ping() * 1000 * 1000),
+            'ping': server.ping(),
             'info': server.get_info(),
             'players': server.get_players()
         }
