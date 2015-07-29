@@ -1,5 +1,6 @@
 gevent==1.0.2
 
+uwsgi==2.0.9
 flask==0.10.1
 flask-script==2.0.5
 
