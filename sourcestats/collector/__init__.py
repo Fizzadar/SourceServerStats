@@ -164,7 +164,7 @@ def index():
             start = time()
 
             logger.info('Indexing {0} documents...'.format(index_buffer_count))
-            num_inserted, errors = bulk(es_client, index_buffer)
+            num_inserted, errors = bulk(es_client, index_buffer, raise_on_error=False)
 
             if errors:
                 for error in errors:
