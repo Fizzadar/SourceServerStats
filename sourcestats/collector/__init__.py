@@ -124,6 +124,7 @@ def _find_servers(host, region):
         # Protocol is UDP so there's no "end"
         if u'Timed out' not in e.message:
             logger.warning('Error querying master server: {0}'.format(e))
+
     finally:
         logger.info('Found {0} addresses'.format(count))
 

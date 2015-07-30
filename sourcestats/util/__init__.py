@@ -7,13 +7,7 @@ from hashlib import sha1
 import requests
 from flask import jsonify, abort
 
-#SOURCE_APPS = None
-SOURCE_APPS = {
-    240: 'Counter Strike: Source',
-    440: 'Team Fortress 2',
-    730: 'Counter Strike: Global Offensive',
-    4000: "Garry's Mod"
-}
+SOURCE_APPS = None
 
 
 def get_source_apps():
