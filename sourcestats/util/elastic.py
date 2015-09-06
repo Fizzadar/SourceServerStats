@@ -33,6 +33,21 @@ def get_es_query(doc_type='server'):
 def get_request_filters():
     filters = []
 
+    since = None
+
+    # Prefer since arg, but ignore if invalid (not ISO format YYYY-MM-DD)
+    if 'since' in request.args:
+        try:
+            since = datetime.strptime(request.args['since'], '%Y-%M-%D')
+        except ValueError:
+            pass
+
+    # Default one day
+    if since is None:
+        since = (datetime.utcnow() - timedelta(days=1)).replace(microsecond=0)
+
+    filters.append(Filter.range('datetime', gte=since))
+
     for field in [
         'game_id',
         'map'
