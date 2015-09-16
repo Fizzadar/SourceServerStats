@@ -2,7 +2,8 @@
 # File: deploy/deploy.py
 # Desc: pyinfra deploy script, targets Ubuntu
 
-from pyinfra.modules import server, files, apt, pip, init, git
+from pyinfra import host
+from pyinfra.modules import server, files, apt, pip, init, git, local
 
 
 # Install system packages
@@ -38,7 +39,7 @@ server.user(
 )
 
 # Create app & env dir
-for directory in ['/opt/sourcestats', '/opt/env/sourcestats']:
+for directory in [host.data.app_dir, host.data.env_dir]:
     files.directory(
         directory,
         user='sourcestats',
@@ -48,7 +49,7 @@ for directory in ['/opt/sourcestats', '/opt/env/sourcestats']:
 # Clone the app
 git.repo(
     'https://github.com/Fizzadar/SourceServerStats',
-    '/opt/sourcestats',
+    host.data.app_dir,
     branch='develop',
     pull=True,
     sudo=True,
@@ -57,7 +58,7 @@ git.repo(
 
 # Create a virtualenv
 server.shell(
-    'virtualenv /opt/env/sourcestats',
+    'virtualenv {0}'.format(host.data.env_dir),
     sudo=True,
     sudo_user='sourcestats'
 )
@@ -65,15 +66,15 @@ server.shell(
 # Install the requirements
 pip.packages(
     requirements='/opt/sourcestats/requirements.pip',
-    venv='/opt/env/sourcestats',
+    venv=host.data.env_dir,
     sudo=True,
     sudo_user='sourcestats'
 )
 
 # Build webpack locally
-server.shell(
+local.shell(
     'grunt build',
-    local=True
+    run_once=True
 )
 
 # Sync static/dist directories
