@@ -9,7 +9,7 @@ var webpack = require('webpack');
 
 var webpackConfig = {
     entry: {
-        main: './webpack/main.js'
+        main: './sourcestats/webpack/main.js'
     },
     output: {
         path: './sourcestats/static/dist/'
