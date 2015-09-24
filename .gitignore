@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 sourcestats/static/dist/
 .venv
+.vagrant
