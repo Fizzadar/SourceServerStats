@@ -13,6 +13,8 @@ apt.packages(
         'python-pip', 'python-dev',
         'openjdk-7-jre-headless', 'nginx', 'supervisor'
     ],
+    update=True,
+    #update_time=3600,
     sudo=True
 )
 
@@ -46,16 +48,6 @@ for directory in [host.data.app_dir, host.data.env_dir]:
         sudo=True
     )
 
-# Clone the app
-git.repo(
-    'https://github.com/Fizzadar/SourceServerStats',
-    host.data.app_dir,
-    branch='develop',
-    pull=True,
-    sudo=True,
-    sudo_user='sourcestats'
-)
-
 # Create a virtualenv
 server.shell(
     'virtualenv {0}'.format(host.data.env_dir),
@@ -63,41 +55,39 @@ server.shell(
     sudo_user='sourcestats'
 )
 
+# This is all covered by the synced Vagrant folder
+if host.data.env != 'dev':
+    # Clone the app
+    git.repo(
+        'https://github.com/Fizzadar/SourceServerStats',
+        host.data.app_dir,
+        branch='develop',
+        pull=True,
+        sudo=True,
+        sudo_user='sourcestats'
+    )
+
+    # Build webpack locally
+    local.shell(
+        'grunt build',
+        run_once=True
+    )
+
+    # Sync static/dist directories
+    files.sync(
+        '../sourcestats/static/dist',
+        '{0}/sourcestats/static/dist'.format(host.data.app_dir),
+        delete=True,
+        sudo=True,
+        sudo_user='sourcestats'
+    )
+
 # Install the requirements
 pip.packages(
-    requirements='/opt/sourcestats/requirements.pip',
+    requirements='{0}/requirements.pip'.format(host.data.app_dir),
     venv=host.data.env_dir,
     sudo=True,
     sudo_user='sourcestats'
-)
-
-# Build webpack locally
-local.shell(
-    'grunt build',
-    run_once=True
-)
-
-# Sync static/dist directories
-files.sync(
-    '../sourcestats/static/dist',
-    '/opt/sourcestats/static/dist',
-    delete=True,
-    sudo=True,
-    sudo_user='sourcestats'
-)
-
-# Upload collector supervisor config
-files.put(
-    'files/api.supervisor.conf',
-    '/etc/supervisor/conf.d/api.conf',
-    sudo=True
-)
-
-# Upload API supervisor config
-files.put(
-    'files/collector.supervisor.conf',
-    '/etc/supervisor/conf.d/collector.conf',
-    sudo=True
 )
 
 # Remove default Nginx config
@@ -106,17 +96,18 @@ server.shell(
     sudo=True
 )
 # ...and upload Nginx config
-files.put(
-    'files/sourcestats.nginx.conf',
+files.template(
+    'templates/sourcestats.nginx.conf.jn2',
     '/etc/nginx/sites-enabled/sourcestats',
-    sudo=True
+    sudo=True,
+    is_dev=host.data.env == 'dev'
 )
 
 # Start Elasticsearch/supervisord
-for service in ['elasticsearch', 'supervisord']:
+for service in ['elasticsearch', 'supervisor']:
     init.d(
         service,
-        running=False,
+        running=True,
         sudo=True
     )
 # ...wait for ES to come online
@@ -139,9 +130,26 @@ server.shell(
     'curl -X PUT {0}/history/_mapping -d@/opt/sourcestats/mappings/history.json'.format(es_prefix)
 )
 
-# Update/restart supervisor tasks
-server.shell(
-    'supervisorctl update',
-    'supervisorctl restart all',
-    sudo=True
-)
+
+# No supervisor tasks in dev
+if host.data.env != 'dev':
+    # Upload collector supervisor config
+    files.put(
+        'files/api.supervisor.conf',
+        '/etc/supervisor/conf.d/api.conf',
+        sudo=True
+    )
+
+    # Upload API supervisor config
+    files.put(
+        'files/collector.supervisor.conf',
+        '/etc/supervisor/conf.d/collector.conf',
+        sudo=True
+    )
+
+    # Update/restart supervisor tasks
+    server.shell(
+        'supervisorctl update',
+        'supervisorctl restart all',
+        sudo=True
+    )
