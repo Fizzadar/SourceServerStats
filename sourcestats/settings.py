@@ -5,7 +5,7 @@
 DEBUG = True
 
 # Number of servers to collect from in parallel
-PARALLEL = 1000
+PARALLEL = 6000
 
 # Loop intervals (+time to execute!)
 COLLECT_INTERVAL = 30
