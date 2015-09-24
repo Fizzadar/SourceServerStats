@@ -33,6 +33,11 @@ address_blacklist = set()
 def _collect_stats(address):
     server = ServerQuerier(address, timeout=settings.SERVER_TIMEOUT)
 
+    def blacklist(reason):
+        addresses.remove(address)
+        address_blacklist.add(address)
+        logger.warning('Blacklisting {0}: {1}'.format(reason, address))
+
     try:
         stats = {
             'ping': server.ping(),
@@ -42,8 +47,7 @@ def _collect_stats(address):
 
         # We're only interested in source apps
         if stats['info']['app_id'] not in source_apps:
-            address_blacklist.add(address)
-            logger.warning('Blacklisting as not source: {0}'.format(address))
+            blacklist('as not source')
             return
 
         # Index the stats in indexer greenlet
@@ -54,9 +58,16 @@ def _collect_stats(address):
 
     # python-valve doesn't support compressed fragments
     except NotImplementedError:
-        addresses.remove(address)
-        address_blacklist.add(address)
-        logger.warning('Blacklisting for NotImplemented: {0}'.format(address))
+        blacklist('for NotImplemented')
+
+    # Somtimes servers return invalid server types
+    except ValueError as e:
+        if 'Invalid server type' in e.message:
+            blacklist('for invalid server type')
+
+        # But we don't want to blanket capture all ValueErrors
+        else:
+            raise ValueError(e.message)
 
     except (NoResponseError, BrokenMessageError):
         # UDP is flakey
