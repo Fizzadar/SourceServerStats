@@ -1,5 +1,15 @@
 # Source Server Stats
 
+## Development
+
+```sh
+# Up the Vagrant VM
+vagrant up
+
+# Deploy with pyinfra
+pyinfra -i deploy/inventories/dev.py deploy/deploy.py
+```
+
 ## Deploy
 
 Manual for now - deploy directory contains a [pyinfra](https://github.com/Fizzadar/pyinfra) deploy script/inventory but uses numerous features not yet implemented in pyinfra!
