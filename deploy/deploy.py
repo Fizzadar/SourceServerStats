@@ -14,7 +14,7 @@ apt.packages(
         'openjdk-7-jre-headless', 'nginx', 'supervisor'
     ],
     update=True,
-    #update_time=3600,
+    update_time=3600,
     sudo=True
 )
 
@@ -49,11 +49,12 @@ for directory in [host.data.app_dir, host.data.env_dir]:
     )
 
 # Create a virtualenv
-server.shell(
-    'virtualenv {0}'.format(host.data.env_dir),
-    sudo=True,
-    sudo_user='sourcestats'
-)
+if not host.file('{0}/bin/activate'.format(host.data.env_dir)):
+    server.shell(
+        'virtualenv {0}'.format(host.data.env_dir),
+        sudo=True,
+        sudo_user='sourcestats'
+    )
 
 # This is all covered by the synced Vagrant folder
 if host.data.env != 'dev':
@@ -77,9 +78,10 @@ if host.data.env != 'dev':
     files.sync(
         '../sourcestats/static/dist',
         '{0}/sourcestats/static/dist'.format(host.data.app_dir),
+        user='sourcestats',
+        group='sourcestats',
         delete=True,
-        sudo=True,
-        sudo_user='sourcestats'
+        sudo=True
     )
 
 # Install the requirements
