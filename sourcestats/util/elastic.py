@@ -98,7 +98,11 @@ def get_es_history(
     filters.append(Filter.range('datetime', gte=since))
     q.filter(Filter.and_(*filters))
 
-    aggregates = [Aggregate.sum('players', 'player_count')]
+    aggregates = [
+        Aggregate.nested('players', 'players').aggregate(
+            Aggregate.cardinality('player_count', 'players.name')
+        )
+    ]
 
     if include_ping:
         aggregates.append(Aggregate.avg('ping', 'ping'))
@@ -116,7 +120,7 @@ def get_es_history(
     for bucket in results['aggregations']['times']['buckets']:
         date_bucket = {
             'datetime': bucket['key_as_string'],
-            'players': bucket['players']['value']
+            'players': bucket['players']['player_count']['value']
         }
 
         if include_ping:

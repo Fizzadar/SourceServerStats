@@ -206,7 +206,6 @@ def index():
             'game_id': info['app_id'],
             'gamemode': info['game'],
             'map': info['map'],
-            'player_count': players['player_count'],
             'players': [
                 {
                     'name': player['name'],
@@ -225,7 +224,8 @@ def index():
             'name': info['server_name'],
             'platform': str(info['platform']),
             'server_type': str(info['server_type']),
-            'max_players': info['max_players']
+            'max_players': info['max_players'],
+            'player_count': players['player_count']
         })
 
         index_buffer.append({
