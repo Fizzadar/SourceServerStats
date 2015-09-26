@@ -83,7 +83,7 @@ def get_es_terms(field_name, size=settings.ES_TERMS, filters=None, doc_type='ser
 
 
 def get_es_history(
-    interval='5m', since=None, filters=None,
+    interval='15m', since=None, filters=None,
     include_ping=False, include_servers=False
 ):
     q = get_es_query(doc_type='history')
