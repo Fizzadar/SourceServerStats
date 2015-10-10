@@ -2,10 +2,13 @@
 # File: sourcestats/settings.py
 # Desc: settings for the Flask server
 
-DEBUG = True
+import os
+
+ENV = os.environ.get('ENV', 'dev')
+DEBUG = ENV == 'dev'
 
 # Number of servers to collect from in parallel
-PARALLEL = 6000
+PARALLEL = 100
 
 # Loop intervals (+time to execute!)
 COLLECT_INTERVAL = 30
@@ -14,7 +17,7 @@ FIND_INTERVAL = 300
 # Timeout for reading addresses via UDP from Valve
 MASTER_TIMEOUT = 30
 # Timeout for reading status from gameservers
-SERVER_TIMEOUT = 30
+SERVER_TIMEOUT = 10
 # Number of times a server fails before blacklisting
 FAIL_COUNT = 5
 
@@ -42,3 +45,8 @@ VALVE_REGIONS = [
     u'af',
     u'rest'
 ]
+
+
+# Env specific settings
+if ENV == 'production':
+    PARALLEL = 6000
