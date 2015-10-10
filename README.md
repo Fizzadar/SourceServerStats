@@ -8,6 +8,12 @@ vagrant up
 
 # Deploy with pyinfra
 pyinfra -i deploy/inventories/dev.py deploy/deploy.py
+
+# To run the webserver
+./manage.py runserver
+
+# To run the collector
+python -m sourcestats.collector
 ```
 
 ## Deploy
