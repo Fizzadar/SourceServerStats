@@ -23,9 +23,7 @@ def get_servers():
     queries = []
 
     # Always aggregate number of players
-    q.aggregate(Aggregate.nested('players', 'players').aggregate(
-        Aggregate.value_count('player_count', 'players.name')
-    ))
+    q.aggregate(Aggregate.sum('player_count', 'player_count'))
 
     # Pagination
     q.size(request.args.get('size', 50))
@@ -85,7 +83,7 @@ def get_servers():
 
     return jsonify(
         total=results['hits']['total'],
-        players=results['aggregations']['players']['player_count']['value'],
+        players=results['aggregations']['player_count']['value'],
         servers=servers
     )
 

@@ -98,6 +98,9 @@ def get_es_history(
     filters.append(Filter.range('datetime', gte=since))
     q.filter(Filter.and_(*filters))
 
+    # Because stats aren't collected on a fixed interval, we can't sum the player_count
+    # field as it will result in duplicates. So here we do a cardinality aggregate
+    # on the player names to get an accurate # of players per interval.
     aggregates = [
         Aggregate.nested('players', 'players').aggregate(
             Aggregate.cardinality('player_count', 'players.name')
