@@ -1,10 +1,12 @@
-{% if is_dev %}
+{% if host.data.env == 'dev' %}
+    # Dev server, pass to Flask debug server
     server {
         location / {
             proxy_pass http://127.0.0.1:5000;
         }
     }
 {% else %}
+    # Production server, pass to uwsgi socket
     server {
         charset utf-8;
         include uwsgi_params;

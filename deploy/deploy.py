@@ -26,8 +26,8 @@ pip.packages(
 
 # and Elasticsearch
 server.shell(
-    'wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.6.0.deb',
-    'dpkg -i elasticsearch-1.6.0.deb',
+    'wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-{0}.deb'.format(host.data.elasticsearch_version),
+    'dpkg -i elasticsearch-{0}.deb'.format(host.data.elasticsearch_version),
     '/usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head || true',
     sudo=True
 )
@@ -101,17 +101,15 @@ server.shell(
 files.template(
     'templates/sourcestats.nginx.conf.jn2',
     '/etc/nginx/sites-enabled/sourcestats',
-    sudo=True,
-    is_dev=host.data.env == 'dev'
+    sudo=True
 )
 
-# Start Elasticsearch/supervisord
-for service in ['elasticsearch', 'supervisor']:
-    init.d(
-        service,
-        running=True,
-        sudo=True
-    )
+# Start Elasticsearch
+init.d(
+    'elasticsearch',
+    running=True,
+    sudo=True
+)
 # ...wait for ES to come online
 server.wait(
     port=9200
@@ -128,13 +126,24 @@ init.d(
 es_prefix = 'localhost:9200/sourcestats'
 server.shell(
     'curl -X POST {0}'.format(es_prefix),
-    'curl -X PUT {0}/server/_mapping -d@/opt/sourcestats/mappings/server.json'.format(es_prefix),
-    'curl -X PUT {0}/history/_mapping -d@/opt/sourcestats/mappings/history.json'.format(es_prefix)
+    'curl -X PUT {0}/server/_mapping -d@{1}/mappings/server.json'.format(
+        es_prefix, host.data.app_dir
+    ),
+    'curl -X PUT {0}/history/_mapping -d@{1}/mappings/history.json'.format(
+        es_prefix, host.data.app_dir
+    )
 )
 
 
 # No supervisor tasks in dev
 if host.data.env != 'dev':
+    # Set security limits so sourcestats user can parallel 6k connections
+    files.put(
+        'files/limits.conf',
+        '/etc/security/limits.conf',
+        sudo=True
+    )
+
     # Upload collector supervisor config
     files.put(
         'files/api.supervisor.conf',
@@ -149,9 +158,20 @@ if host.data.env != 'dev':
         sudo=True
     )
 
-    # Update/restart supervisor tasks
-    server.shell(
-        'supervisorctl update',
-        'supervisorctl restart all',
+    # Restart supervisor
+    init.d(
+        'supervisor',
+        restarted=True,
+        sudo=True
+    )
+
+# Dev additions
+else:
+    # Setup vagrant's .bash_profile for dev
+    files.template(
+        'templates/vagrant.bash_profile.jn2',
+        '/home/vagrant/.bash_profile',
+        user='vagrant',
+        group='vagrant',
         sudo=True
     )

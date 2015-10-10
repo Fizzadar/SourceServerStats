@@ -1,0 +1,5 @@
+# Load the venv
+source {{ host.data.env_dir }}/bin/activate
+
+# Go to sourcestats
+cd {{ host.data.app_dir }}
