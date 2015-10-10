@@ -28,12 +28,26 @@ if __name__ == '__main__':
     logger.addHandler(handler)
 
     logger.info('Starting find, collect & index workers...')
-    gevent.spawn(find)
-    gevent.spawn(collect)
-    gevent.spawn(index)
+
+    greenlets = [
+        gevent.spawn(find),
+        gevent.spawn(collect),
+        gevent.spawn(index)
+    ]
 
     try:
-        gevent.wait()
+        while True:
+            # Get greenlets which have stopped (should be empty list)
+            greenlet_states = [greenlet.ready() for greenlet in greenlets]
+            greenlet_states = filter(lambda x: x, greenlet_states)
+
+            # If we have any, something broke!
+            if len(greenlet_states) > 0:
+                break
+
+            gevent.sleep(1)
+
+        logger.critical('One of the greenlets stopped, exiting!')
     except KeyboardInterrupt:
         print 'Exiting upon user request...'
         raise SystemExit(0)
