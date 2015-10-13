@@ -5,7 +5,7 @@
 import _ from 'lodash';
 import React, { PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
-import { connect } from 'redux/react';
+import { connect } from 'react-redux';
 import MG from 'metrics-graphics';
 
 import * as constants from '../constants';

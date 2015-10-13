@@ -3,16 +3,19 @@
 // Desc: App wrapper class for routes/etc
 
 import React from 'react';
-import { Provider } from 'redux/react';
-import { createRedux } from 'redux';
+import thunk from 'redux-thunk';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
 import { Router, Route, Redirect } from 'react-router';
 import { history } from 'react-router/lib/BrowserHistory';
 
 import * as components from './components';
-import * as stores from './stores';
+import * as reducers from './reducers';
 
 
-const redux = createRedux(stores);
+const reducer = combineReducers(reducers);
+const createMiddlewareStore = applyMiddleware(thunk)(createStore);
+const store = createMiddlewareStore(reducer);
 
 function renderRoutes() {
     const {
@@ -40,7 +43,7 @@ function renderRoutes() {
 export class App extends React.Component {
     render() {
         return (
-            <Provider redux={redux}>
+            <Provider store={store}>
                 {renderRoutes}
             </Provider>
         );
