@@ -4,35 +4,47 @@
         "properties": {
             "datetime": {
                 "type": "date",
-                "format": "date_hour_minute_second"
+                "format": "date_hour_minute_second",
+                "doc_values": true
             },
             "server_hash": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "ping": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "game_id": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "gamemode": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "map": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
+            },
+            "player_count": {
+                "type": "integer",
+                "doc_values": true
             },
             "players": {
                 "type": "nested",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "index": "not_analyzed"
+                        "index": "not_analyzed",
+                        "doc_values": true
                     },
                     "score": {
-                        "type": "integer"
+                        "type": "integer",
+                        "doc_values": true
                     }
                 }
             }

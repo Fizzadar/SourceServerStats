@@ -4,60 +4,73 @@
         "properties": {
             "datetime": {
                 "type": "date",
-                "format": "date_hour_minute_second"
+                "format": "date_hour_minute_second",
+                "doc_values": true
             },
             "server_hash": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "host": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "port": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "ping": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
             },
             "game_id": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "gamemode": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "map": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "platform": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "server_type": {
                 "type": "string",
-                "index": "not_analyzed"
+                "index": "not_analyzed",
+                "doc_values": true
             },
             "max_players": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "player_count": {
-                "type": "integer"
+                "type": "integer",
+                "doc_values": true
             },
             "players": {
                 "type": "nested",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "index": "not_analyzed"
+                        "index": "not_analyzed",
+                        "doc_values": true
                     },
                     "score": {
-                        "type": "integer"
+                        "type": "integer",
+                        "doc_values": true
                     }
                 }
             }
