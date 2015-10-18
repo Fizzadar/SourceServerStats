@@ -22,7 +22,9 @@ export class AppContainer extends React.Component {
                 </ul>
 
                 <ul className="nav right">
-                    <li>An experiment by <a href="http://pointlessramblings.com">Fizzadar</a></li>
+                    <li>
+                        An experiment by <a href="http://pointlessramblings.com">Fizzadar</a> - <a href="https://github.com/Fizzadar/SourceServerStats">GitHub</a>
+                    </li>
                 </ul>
             </div>
 
