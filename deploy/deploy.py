@@ -14,7 +14,7 @@ apt.packages(
         'openjdk-7-jre-headless', 'nginx', 'supervisor'
     ],
     update=True,
-    update_time=3600,
+    cache_time=3600,
     sudo=True
 )
 
@@ -70,6 +70,7 @@ if host.data.env != 'dev':
 
     # Build webpack locally
     local.shell(
+        'rm -rf sourcestats/static/dist/',
         'grunt build',
         run_once=True
     )
@@ -122,18 +123,10 @@ init.d(
     sudo=True
 )
 
-# Create index & push any mappings changes
-es_prefix = 'localhost:9200/sourcestats'
+# Create/setup servers index
 server.shell(
-    'curl -X POST {0}'.format(es_prefix),
-    'curl -X PUT {0}/server/_mapping -d@{1}/mappings/server.json'.format(
-        es_prefix, host.data.app_dir
-    ),
-    'curl -X PUT {0}/history/_mapping -d@{1}/mappings/history.json'.format(
-        es_prefix, host.data.app_dir
-    )
+    'cd /opt/sourcestats && /opt/env/sourcestats/bin/python manage.py setup_index'
 )
-
 
 # No supervisor tasks in dev
 if host.data.env != 'dev':
