@@ -11,7 +11,10 @@ from elasticsearch.exceptions import NotFoundError
 from ... import settings
 from ...app import app
 from ...util import api_abort, get_source_apps
-from ...util.elastic import get_es_query, get_es_client, get_es_history, get_request_filters
+from ...util.elastic import (
+    get_es_query, get_es_client, get_request_filters,
+    get_es_history, get_es_terms
+)
 
 
 @app.route('/api/v1/servers')
@@ -28,10 +31,6 @@ def get_servers():
     # Pagination
     q.size(request.args.get('size', 50))
     q.from_(request.args.get('from', 0))
-
-    # Fields filter
-    if 'fields' in request.args:
-        q.fields(request.args['fields'].split(','))
 
     # Manual sorting
     if 'sort_field' in request.args:
@@ -109,53 +108,55 @@ def get_server(server_hash):
     return jsonify(server)
 
 
-@app.route('/api/v1/server/<server_hash>/history')
-def get_server_history(server_hash):
-    '''
-    Returns a date histogram (ping, players) from the history docs for a specific
-    server.
-    '''
+@app.route('/api/v1/server/<server_hash>/history/players')
+def get_server_history_players(server_hash):
+    filters = get_request_filters()
+    filters.append(Filter.term('server_hash', server_hash))
+
     date_histogram = get_es_history(
-        filters=[Filter.term('server_hash', server_hash)],
+        filters=filters,
+        include_players=True
+    )
+    return jsonify(players=date_histogram)
+
+
+@app.route('/api/v1/server/<server_hash>/history/pings')
+def get_server_history_ping(server_hash):
+    filters = get_request_filters()
+    filters.append(Filter.term('server_hash', server_hash))
+
+    date_histogram = get_es_history(
+        filters=filters,
         include_ping=True
     )
-    return jsonify(history=date_histogram)
+    return jsonify(pings=date_histogram)
 
 
-@app.route('/api/v1/server/<server_hash>/history/maps')
-def get_server_maps(server_hash):
-    '''Returns a list of all maps we've ever seen on this server.'''
-    q = get_es_query(doc_type='history')
-    q.size(0)
-    q.filter(Filter.term('server_hash', server_hash))
+@app.route('/api/v1/server/<server_hash>/top/maps')
+def get_server_top_maps(server_hash):
+    '''Returns a list of the top maps we've seen on this server.'''
+    filters = get_request_filters()
+    filters.append(Filter.term('server_hash', server_hash))
 
-    q.aggregate(
-        Aggregate.terms('maps', 'map', size=100)
+    maps, total = get_es_terms(
+        'map',
+        filters=filters,
+        doc_type='history'
     )
 
-    results = q.get()
-    maps = [bucket['key'] for bucket in results['aggregations']['maps']['buckets']]
-
-    return jsonify(maps=maps)
+    return jsonify(maps=maps, total=total)
 
 
-@app.route('/api/v1/server/<server_hash>/history/players')
-def get_server_players(server_hash):
-    '''Returns a list of all players we've ever seen on this server.'''
-    q = get_es_query(doc_type='history')
-    q.size(0)
-    q.filter(Filter.term('server_hash', server_hash))
+@app.route('/api/v1/server/<server_hash>/top/players')
+def get_server_top_players(server_hash):
+    '''Returns the most seen players on this server.'''
+    filters = get_request_filters()
+    filters.append(Filter.term('server_hash', server_hash))
 
-    q.aggregate(
-        Aggregate.nested('players', 'players').aggregate(
-            Aggregate.terms('player_names', 'players.name', size=100)
-        )
+    players, total = get_es_terms(
+        'players.name',
+        filters=filters,
+        doc_type='history'
     )
 
-    results = q.get()
-    players = [
-        bucket['key']
-        for bucket in results['aggregations']['players']['player_names']['buckets']
-    ]
-
-    return jsonify(players=players)
+    return jsonify(players=players, total=total)

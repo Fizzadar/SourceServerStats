@@ -19,6 +19,7 @@ def get_maps():
         request.args.get('size', settings.ES_TERMS),
         filters=get_request_filters()
     )
+
     return jsonify(maps=maps, total=total)
 
 
@@ -28,14 +29,13 @@ def get_map(name):
     filters = get_request_filters()
     filters.append(Filter.term('map', name))
 
+    # Get games/server counts currently playing this map
     games, _ = get_es_terms(
         'game_id',
-        request.args.get('size', settings.ES_TERMS),
-        filters=filters,
-        doc_type='history'
+        filters=filters
     )
 
-    # Attach names
+    # Attach game names
     apps = get_source_apps()
     games = [
         ((game[0], apps.get(game[0], 'Unknown')), game[1])
@@ -45,12 +45,14 @@ def get_map(name):
     return jsonify(name=name, games=games)
 
 
-@app.route('/api/v1/map/<name>/history')
-def get_map_history(name):
-    '''
-    Returns a date histogram of players on this map.
-    '''
+@app.route('/api/v1/map/<name>/history/players')
+def get_map_player_history(name):
+    '''Returns a date histogram of players on this map.'''
+    filters = get_request_filters()
+    filters.append(Filter.term('map', name))
+
     date_histogram = get_es_history(
-        filters=[Filter.term('map', name)]
+        filters=filters,
+        include_players=True
     )
-    return jsonify(history=date_histogram)
+    return jsonify(players=date_histogram)

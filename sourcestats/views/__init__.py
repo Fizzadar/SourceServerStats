@@ -12,13 +12,8 @@ from ..app import app
 _js_file = None
 
 
+@app.route('/<path:_>')
 @app.route('/', defaults={'_': ''})
-@app.route('/servers', defaults={'_': 'servers'})
-@app.route('/games', defaults={'_': 'games'})
-@app.route('/maps', defaults={'_': 'maps'})
-@app.route('/server/<_>')
-@app.route('/game/<_>')
-@app.route('/map/<_>')
 def index(_):
     global _js_file
 

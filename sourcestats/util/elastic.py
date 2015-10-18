@@ -7,8 +7,10 @@ from datetime import datetime, timedelta
 from flask import request
 from elasticsearch import Elasticsearch
 from elasticquery import ElasticQuery, Aggregate, Filter
+from dateutil.parser import parse as parse_date
 
 from .. import settings
+from .request import in_request_args
 
 ES_CLIENT = None
 
@@ -35,24 +37,26 @@ def get_request_filters():
 
     since = None
 
-    # Prefer since arg, but ignore if invalid (not ISO format YYYY-MM-DD)
-    if 'since' in request.args:
+    # Attempt to parse any since
+    if in_request_args('since'):
         try:
-            since = datetime.strptime(request.args['since'], '%Y-%M-%D')
+            since = parse_date(request.args['since'])
         except ValueError:
             pass
 
-    # Default one day
+    # Default to a day
     if since is None:
-        since = (datetime.utcnow() - timedelta(days=1)).replace(microsecond=0)
+        since = datetime.utcnow() - timedelta(days=1)
 
+    # ES mapping format has no microsecond
+    since = since.replace(microsecond=0)
     filters.append(Filter.range('datetime', gte=since))
 
     for field in [
         'game_id',
         'map'
     ]:
-        if field in request.args:
+        if in_request_args(field):
             filters.append(Filter.term(field, request.args[field]))
 
     return filters
@@ -66,46 +70,68 @@ def get_es_terms(field_name, size=settings.ES_TERMS, filters=None, doc_type='ser
     if filters:
         q.filter(Filter.and_(*filters))
 
-    q.aggregate(
+    # Aggregates to generate terms and distinct values
+    aggregates = (
         Aggregate.terms('objects', field_name, size=size),
         Aggregate.cardinality('values', field_name, precision_threshold=10000)
     )
 
-    results = q.get()
-    objects = [
-        (bucket['key'], bucket['doc_count'])
-        for bucket in results['aggregations']['objects']['buckets']
-    ]
+    nested = False
 
-    total = results['aggregations']['values']['value']
+    # Nested aggregate
+    if '.' in field_name:
+        nested_field, field_name = field_name.split('.')
+        nested_aggregate = Aggregate.nested('nested', nested_field).aggregate(*aggregates)
+        q.aggregate(nested_aggregate)
+        nested = True
+
+    # Normal aggregate
+    else:
+        q.aggregate(*aggregates)
+
+    results = q.get()
+    aggregations = results['aggregations']
+
+    if nested:
+        results_object = aggregations['nested']['objects']['buckets']
+        total = aggregations['nested']['values']['value']
+    else:
+        results_object = aggregations['objects']['buckets']
+        total = aggregations['values']['value']
+
+    # For history docs the doc_counts in terms are useless as they'll just be duplicates
+    if doc_type == 'history':
+        objects = [bucket['key'] for bucket in results_object]
+
+    # But in servers they represent what we see live
+    else:
+        objects = [
+            (bucket['key'], bucket['doc_count'])
+            for bucket in results_object
+        ]
 
     return objects, total
 
 
 def get_es_history(
-    interval='15m', since=None, filters=None,
-    include_ping=False, include_servers=False
+    interval='15m', filters=None,
+    include_ping=False, include_servers=False, include_players=False
 ):
     q = get_es_query(doc_type='history')
     q.size(0)
 
-    filters = filters or []
+    if filters:
+        q.filter(Filter.and_(*filters))
 
-    # Default one day
-    if since is None:
-        since = (datetime.utcnow() - timedelta(days=1)).replace(microsecond=0)
-
-    filters.append(Filter.range('datetime', gte=since))
-    q.filter(Filter.and_(*filters))
+    aggregates = []
 
     # Because stats aren't collected on a fixed interval, we can't sum the player_count
     # field as it will result in duplicates. So here we do a cardinality aggregate
     # on the player names to get an accurate # of players per interval.
-    aggregates = [
-        Aggregate.nested('players', 'players').aggregate(
+    if include_players:
+        aggregates.append(Aggregate.nested('players', 'players').aggregate(
             Aggregate.cardinality('player_count', 'players.name')
-        )
-    ]
+        ))
 
     if include_ping:
         aggregates.append(Aggregate.avg('ping', 'ping'))
@@ -122,9 +148,11 @@ def get_es_history(
     date_histogram = []
     for bucket in results['aggregations']['times']['buckets']:
         date_bucket = {
-            'datetime': bucket['key_as_string'],
-            'players': bucket['players']['player_count']['value']
+            'datetime': bucket['key_as_string']
         }
+
+        if include_players:
+            date_bucket['players'] = bucket['players']['player_count']['value']
 
         if include_ping:
             date_bucket['ping'] = bucket['ping']['value']
