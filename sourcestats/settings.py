@@ -8,7 +8,7 @@ ENV = os.environ.get('ENV', 'dev')
 DEBUG = ENV == 'dev'
 
 # Number of servers to collect from in parallel
-PARALLEL = 100
+PARALLEL = 500
 
 # Loop intervals (+time to execute!)
 COLLECT_INTERVAL = 30
@@ -18,15 +18,20 @@ FIND_INTERVAL = 300
 MASTER_TIMEOUT = 30
 # Timeout for reading status from gameservers
 SERVER_TIMEOUT = 10
-# Number of times a server fails before blacklisting
-FAIL_COUNT = 5
 
 # Batch size for indexing documents in ES
 ES_BATCH = 1000
 # Default number of terms to aggregate in ES (/players)
-ES_TERMS = 1000
+ES_TERMS = 50
 ES_INDEX = 'sourcestats'
-ES_HOSTS = ['localhost:9200']
+ES_HOSTS = ['10.10.10.10:9200']
+
+# The servers ES index (alias to versioned)
+SERVERS_INDEX = 'sourcestats_servers'
+# The history ES alias which is assigned to match the below
+HISTORY_INDEXES = 'sourcestats_history'
+# Date format for ES indexes
+INDEX_DATE_FORMAT = '%Y%m%d'
 
 #VALVE_HOSTS = ['hl2master.steampowered.com']
 VALVE_HOSTS = [
@@ -50,3 +55,4 @@ VALVE_REGIONS = [
 # Env specific settings
 if ENV == 'production':
     PARALLEL = 6000
+    ES_HOSTS = ['localhost:9200']

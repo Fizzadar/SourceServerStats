@@ -2,6 +2,7 @@
 # File: sourcestats/collector/__init__.py
 # Desc: the collector
 
+import json
 from time import time
 from datetime import datetime
 from collections import deque
@@ -13,6 +14,7 @@ from valve.source.master_server import MasterServerQuerier
 from valve.source.a2s import ServerQuerier, NoResponseError
 from valve.source.messages import BrokenMessageError
 from elasticsearch.helpers import bulk
+from elasticsearch.exceptions import NotFoundError
 
 from .. import settings, logger
 from ..util import hash_address, get_source_apps
@@ -28,6 +30,44 @@ index_queue = Queue()
 
 addresses = set()
 address_blacklist = set()
+
+
+def _get_history_mappings():
+    mappings_data = open('mappings/server.json', 'r').read()
+    mappings = json.loads(mappings_data)
+
+    return mappings
+
+
+def _get_current_history_index():
+    index_name = '{0}_{1}'.format(
+        settings.HISTORY_INDEXES,
+        datetime.now().strftime(settings.INDEX_DATE_FORMAT)
+    )
+
+    es_client = get_es_client()
+
+    # Check for the index
+    try:
+        es_client.indices.get(index_name)
+
+    # Create if not existing
+    except NotFoundError:
+        es_client.indices.create(index_name)
+
+        # Put the mappings
+        es_client.indices.put_mapping(
+            index=index_name,
+            doc_type='server', body=_get_history_mappings()
+        )
+
+        # Update the alias
+        get_es_client().indices.put_alias(
+            index='{0}_*'.format(settings.HISTORY_INDEXES),
+            name=settings.HISTORY_INDEXES
+        )
+
+    return index_name
 
 
 def _collect_stats(address):
@@ -229,14 +269,16 @@ def index():
         })
 
         index_buffer.append({
-            '_index': settings.ES_INDEX,
+            '_index': settings.SERVERS_INDEX,
             '_type': 'server',
             '_id': server_hash,
             '_source': current_stats
         })
 
+        # Get the current day history index
+        current_history_index = _get_current_history_index()
         index_buffer.append({
-            '_index': settings.ES_INDEX,
-            '_type': 'history',
+            '_index': current_history_index,
+            '_type': 'server',
             '_source': history_stats
         })

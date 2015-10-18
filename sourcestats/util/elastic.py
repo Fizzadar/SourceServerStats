@@ -24,11 +24,11 @@ def get_es_client():
     return ES_CLIENT
 
 
-def get_es_query(doc_type='server'):
+def get_es_query(index=settings.SERVERS_INDEX):
     return ElasticQuery(
         es=get_es_client(),
-        index=settings.ES_INDEX,
-        doc_type=doc_type
+        index=index,
+        doc_type='server'
     )
 
 
@@ -62,10 +62,13 @@ def get_request_filters():
     return filters
 
 
-def get_es_terms(field_name, size=settings.ES_TERMS, filters=None, doc_type='server'):
+def get_es_terms(field_name, filters=None, size=None, index=settings.SERVERS_INDEX):
     '''List 'objects', ie distinct field values from the indexes.'''
-    q = get_es_query(doc_type=doc_type)
+    q = get_es_query(index=index)
     q.size(0)
+
+    if size is None:
+        size = settings.ES_TERMS
 
     if filters:
         q.filter(Filter.and_(*filters))
@@ -100,7 +103,7 @@ def get_es_terms(field_name, size=settings.ES_TERMS, filters=None, doc_type='ser
         total = aggregations['values']['value']
 
     # For history docs the doc_counts in terms are useless as they'll just be duplicates
-    if doc_type == 'history':
+    if index == settings.HISTORY_INDEXES:
         objects = [bucket['key'] for bucket in results_object]
 
     # But in servers they represent what we see live
@@ -117,7 +120,7 @@ def get_es_history(
     interval='15m', filters=None,
     include_ping=False, include_servers=False, include_players=False
 ):
-    q = get_es_query(doc_type='history')
+    q = get_es_query(index=settings.HISTORY_INDEXES)
     q.size(0)
 
     if filters:

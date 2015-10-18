@@ -1,5 +1,5 @@
 {
-    "history": {
+    "server": {
         "dynamic": false,
         "properties": {
             "datetime": {

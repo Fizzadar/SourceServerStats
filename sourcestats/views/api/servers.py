@@ -92,7 +92,7 @@ def get_server(server_hash):
     '''Returns the current state of a server.'''
     try:
         server = get_es_client().get(
-            index=settings.ES_INDEX,
+            index=settings.SERVERS_INDEX,
             doc_type='server',
             id=server_hash
         )
@@ -141,7 +141,8 @@ def get_server_top_maps(server_hash):
     maps, total = get_es_terms(
         'map',
         filters=filters,
-        doc_type='history'
+        index=settings.HISTORY_INDEXES,
+        size=request.args.get('size')
     )
 
     return jsonify(maps=maps, total=total)
@@ -156,7 +157,8 @@ def get_server_top_players(server_hash):
     players, total = get_es_terms(
         'players.name',
         filters=filters,
-        doc_type='history'
+        index=settings.HISTORY_INDEXES,
+        size=request.args.get('size')
     )
 
     return jsonify(players=players, total=total)

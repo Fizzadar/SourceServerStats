@@ -5,7 +5,6 @@
 from flask import jsonify, request
 from elasticquery import Filter
 
-from ... import settings
 from ...app import app
 from ...util import get_source_apps
 from ...util.elastic import get_es_history, get_es_terms, get_request_filters
@@ -16,8 +15,8 @@ def get_maps():
     '''List current maps and the number of servers playing on them.'''
     maps, total = get_es_terms(
         'map',
-        request.args.get('size', settings.ES_TERMS),
-        filters=get_request_filters()
+        filters=get_request_filters(),
+        size=request.args.get('size')
     )
 
     return jsonify(maps=maps, total=total)
