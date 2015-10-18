@@ -15,10 +15,10 @@ export class AppContainer extends React.Component {
                 </a></h1>
 
                 <ul className="nav">
-                    <li><Link to={'/servers'}>Servers</Link></li>
-                    <li><Link to={'/maps'}>Maps</Link></li>
-                    <li><Link to={'/games'}>Games</Link></li>
-                    <li><Link to={'/global'}>Global</Link></li>
+                    <li><Link to={'/servers'} activeClassName='active'>Servers</Link></li>
+                    <li><Link to={'/maps'} activeClassName='active'>Maps</Link></li>
+                    <li><Link to={'/games'} activeClassName='active'>Games</Link></li>
+                    <li><Link to={'/global'} activeClassName='active'>Global</Link></li>
                 </ul>
 
                 <ul className="nav right">

@@ -5,4 +5,4 @@
 export { servers, server } from './servers';
 export { maps, map } from './maps';
 export { games, game } from './games';
-export { history } from './history';
+export { global } from './global';
