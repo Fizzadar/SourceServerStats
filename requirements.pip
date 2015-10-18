@@ -4,6 +4,8 @@ uwsgi==2.0.9
 flask==0.10.1
 flask-script==2.0.5
 
+python-dateutil==2.4.2
+
 elasticsearch==1.6.0
 elasticquery==2.1.1
 
