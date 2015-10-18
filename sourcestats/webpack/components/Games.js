@@ -1,5 +1,5 @@
 // Source Server Stats
-// File: webpack/components/Games.js
+// File: sourcestats/webpack/components/Games.js
 // Desc: the game list view
 
 import _ from 'lodash';
@@ -17,7 +17,8 @@ class Games extends React.Component {
     }
 
     static contextTypes = {
-        router: PropTypes.object
+        location: PropTypes.object.isRequired,
+        history: PropTypes.object.isRequired
     }
 
     state = {
@@ -25,7 +26,7 @@ class Games extends React.Component {
     }
 
     componentDidMount() {
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         this.props.fetchGames();
@@ -37,7 +38,7 @@ class Games extends React.Component {
     }
 
     componentDidUpdate() {
-        const { query } = this.context.router.state.location;
+        const { query } = this.context.location;
 
         if (query === null)
             if (this.state.nameFilter.length > 0)
@@ -47,7 +48,7 @@ class Games extends React.Component {
     }
 
     updateQuery(key, value) {
-        let { query } = this.context.router.state.location;
+        let { query, pathname } = this.context.location;
         query = query || {};
 
         if (value)
@@ -55,7 +56,7 @@ class Games extends React.Component {
         else if (query[key])
             delete query[key];
 
-        this.context.router.transitionTo('/games', query);
+        this.context.history.pushState(null, pathname, query);
     }
 
     handleSearch(value) {
@@ -67,11 +68,11 @@ class Games extends React.Component {
 
     render() {
         // Work out the query
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         // Filter the games
-        const { games } = this.props;
+        const { games, totalGames } = this.props.data;
         const searchRegex = new RegExp(this.state.nameFilter, 'i');
         let filteredGames = _.filter(games, (game) => {
             return game[0][1].match(searchRegex);
@@ -91,7 +92,7 @@ class Games extends React.Component {
                 />
 
                 <span className='right'>
-                    Tracking <strong>{this.props.totalGames.toLocaleString()}</strong> games
+                    Tracking <strong>{totalGames.toLocaleString()}</strong> games
                 </span>
             </form>
 
@@ -108,16 +109,16 @@ class Games extends React.Component {
 
 
 @connect(state => ({
-    games: state.games.games,
-    totalGames: state.games.totalGames
+    data: state.games.data,
+    update: state.games.update
 }))
 export class GamesContainer extends React.Component {
     render() {
-        const { games, totalGames, dispatch } = this.props;
+        const { data, update, dispatch } = this.props;
 
         return <Games
-            games={games}
-            totalGames={totalGames}
+            data={data}
+            update={update}
             {...bindActionCreators(actions, dispatch)}
         />;
     }

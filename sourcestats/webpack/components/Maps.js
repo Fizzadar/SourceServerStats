@@ -1,5 +1,5 @@
 // Source Server Stats
-// File: webpack/components/Maps.js
+// File: sourcestats/webpack/components/Maps.js
 // Desc: the map list view
 
 import _ from 'lodash';
@@ -11,6 +11,9 @@ import Select from 'react-select';
 
 import * as actions from '../actions/maps';
 
+import { fetchGames } from '../actions/games';
+actions.fetchGames = fetchGames;
+
 
 class Maps extends React.Component {
     static PropTypes = {
@@ -19,7 +22,8 @@ class Maps extends React.Component {
     }
 
     static contextTypes = {
-        router: PropTypes.object
+        location: PropTypes.object.isRequired,
+        history: PropTypes.object.isRequired
     }
 
     state = {
@@ -27,7 +31,7 @@ class Maps extends React.Component {
     }
 
     componentDidMount() {
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         this.props.fetchGames();
@@ -40,7 +44,7 @@ class Maps extends React.Component {
     }
 
     componentDidUpdate() {
-        const { query } = this.context.router.state.location;
+        const { query } = this.context.location;
 
         if (query === null) {
             if (this.state.nameFilter.length > 0)
@@ -54,7 +58,7 @@ class Maps extends React.Component {
     }
 
     updateQuery(key, value) {
-        let { query } = this.context.router.state.location;
+        let { query, pathname } = this.context.location;
         query = query || {};
 
         if (value)
@@ -62,7 +66,7 @@ class Maps extends React.Component {
         else if (query[key])
             delete query[key];
 
-        this.context.router.transitionTo('/maps', query);
+        this.context.history.pushState(null, pathname, query);
     }
 
     handleSearch(value) {
@@ -79,11 +83,11 @@ class Maps extends React.Component {
 
     render() {
         // Work out the query
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         // Filter the maps
-        const { maps } = this.props;
+        const { maps, totalMaps, games } = this.props.data;
         const searchRegex = new RegExp(this.state.nameFilter, 'i');
         let filteredMaps = _.filter(maps, (map) => {
             return map[0].match(searchRegex);
@@ -98,7 +102,7 @@ class Maps extends React.Component {
                 <Select
                     value={query.game_id}
                     placeholder='Filter by game...'
-                    options={this.props.games.map((game) => {
+                    options={games.map((game) => {
                         return {
                             value: game[0][0].toString(),
                             label: game[0][1] + ' (' + game[1].toLocaleString() + ' servers)'
@@ -115,7 +119,7 @@ class Maps extends React.Component {
                 />
 
                 <span className='right'>
-                    Tracking <strong>{this.props.totalMaps.toLocaleString()}</strong> maps
+                    Tracking <strong>{totalMaps.toLocaleString()}</strong> maps
                 </span>
             </form>
 
@@ -132,20 +136,16 @@ class Maps extends React.Component {
 
 
 @connect(state => ({
-    maps: state.maps.maps,
-    totalMaps: state.maps.totalMaps,
-    games: state.maps.games,
-    gameId: state.maps.gameId
+    data: state.maps.data,
+    update: state.maps.update
 }))
 export class MapsContainer extends React.Component {
     render() {
-        const { maps, totalMaps, games, gameId, dispatch } = this.props;
+        const { data, update, dispatch } = this.props;
 
         return <Maps
-            maps={maps}
-            totalMaps={totalMaps}
-            games={games}
-            gameId={gameId}
+            data={data}
+            update={update}
             {...bindActionCreators(actions, dispatch)}
         />;
     }

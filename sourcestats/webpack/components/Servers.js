@@ -1,5 +1,5 @@
-/// Source Server Stats
-// File: webpack/components/Servers.js
+// Source Server Stats
+// File: sourcestats/webpack/components/Servers.js
 // Desc: the servers list/table
 
 import _ from 'lodash';
@@ -11,6 +11,9 @@ import Select from 'react-select';
 
 import { timeAgo } from '../util';
 import * as actions from '../actions/servers';
+
+import { fetchGames } from '../actions/games';
+actions.fetchGames = fetchGames;
 
 const body = document.body;
 const html = document.documentElement;
@@ -28,15 +31,16 @@ class Servers extends React.Component {
     }
 
     static contextTypes = {
-        router: PropTypes.object
+        location: PropTypes.object.isRequired,
+        history: PropTypes.object.isRequired
     }
 
     componentDidMount() {
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         // Fetch games if needed
-        if (this.props.games.length === 0)
+        if (this.props.data.games.length === 0)
             this.props.fetchGames();
 
         // Set the filters to the query
@@ -47,7 +51,7 @@ class Servers extends React.Component {
     }
 
     componentDidUpdate() {
-        const { query } = this.context.router.state.location;
+        const { query } = this.context.location;
 
         if (query === null && _.keys(this.serverFilters).length > 0) {
             this.serverFilters = {};
@@ -83,12 +87,18 @@ class Servers extends React.Component {
     debouncedFilterServers = _.debounce(() => this.filterServers(), 100);
 
     handleFilter(key, value) {
+        let { pathname } = this.context.location;
+
         if (value)
             this.serverFilters[key] = value;
         else
             delete this.serverFilters[key];
 
-        this.context.router.transitionTo('/servers', _.pick(this.serverFilters, (v) => v));
+        this.context.history.pushState(
+            null, pathname,
+            _.pick(this.serverFilters, (v) => v)
+        );
+
         this.debouncedFilterServers();
     }
 
@@ -98,10 +108,12 @@ class Servers extends React.Component {
     }
 
     render() {
+        const { servers, totalServers, totalPlayers } = this.props.data;
+
         // Allows the scroll checker to run
         this.loopLock = false;
 
-        let { query } = this.context.router.state.location;
+        let { query } = this.context.location;
         query = query || {};
 
         return (<div id='servers'>
@@ -109,7 +121,7 @@ class Servers extends React.Component {
                 <Select
                     value={query.game_id}
                     placeholder='Filter by game...'
-                    options={this.props.games.map((game) => {
+                    options={this.props.data.games.map((game) => {
                         return {
                             value: game[0][0].toString(),
                             label: game[0][1] + ' (' + game[1].toLocaleString() + ' servers)'
@@ -126,7 +138,7 @@ class Servers extends React.Component {
                 />
 
                 <span className='right'>
-                    Tracking <strong>{this.props.totalServers.toLocaleString()}</strong> servers with <strong>{this.props.totalPlayers.toLocaleString()}</strong> players
+                    Tracking <strong>{totalServers.toLocaleString()}</strong> servers with <strong>{totalPlayers.toLocaleString()}</strong> players
                 </span>
             </form>
 
@@ -141,7 +153,7 @@ class Servers extends React.Component {
                     <th width="100px"></th>
                 </tr></thead>
                 <tbody>
-                    {this.props.servers.map((server, i) => (<tr key={i}>
+                    {servers.map((server, i) => (<tr key={i}>
                         <td>{timeAgo(server.datetime)}</td>
                         <td>
                             <Link to={`/server/${server.server_hash}`}>{server.name}</Link>
@@ -170,25 +182,16 @@ class Servers extends React.Component {
 
 
 @connect(state => ({
-    servers: state.servers.servers,
-    totalServers: state.servers.totalServers,
-    totalPlayers: state.servers.totalPlayers,
-    filters: state.servers.filters,
-    games: state.servers.games
+    data: state.servers.data,
+    update: state.servers.update
 }))
 export class ServersContainer extends React.Component {
     render() {
-        const {
-            servers, totalServers, totalPlayers,
-            filters, games, dispatch
-        } = this.props;
+        const { data, update, dispatch } = this.props;
 
         return <Servers
-            servers={servers}
-            totalServers={totalServers}
-            totalPlayers={totalPlayers}
-            filters={filters}
-            games={games}
+            data={data}
+            update={update}
             {...bindActionCreators(actions, dispatch)}
         />;
     }

@@ -1,5 +1,5 @@
 // Source Server Stats
-// File: webpack/util.js
+// File: sourcestats/webpack/util.js
 // Desc: utility functions for the frontend
 
 

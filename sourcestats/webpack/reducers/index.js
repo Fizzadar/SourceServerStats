@@ -1,13 +1,8 @@
 // Source Server Stats
-// File: webpack/stores/index.js
-// Desc: all the stores!
+// File: sourcestats/webpack/reducers/index.js
+// Desc: all the reducers!
 
-// Lists
-export { servers } from './servers';
-export { maps } from './maps';
-export { games } from './games';
-
-// Objects
-export { server } from './server';
-export { map } from './map';
-export { game } from './game';
+export { servers, server } from './servers';
+export { maps, map } from './maps';
+export { games, game } from './games';
+export { history } from './history';

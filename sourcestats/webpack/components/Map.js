@@ -1,49 +1,29 @@
 // Source Server Stats
-// File: webpack/components/Map.js
+// File: sourcestats/webpack/components/Map.js
 // Desc: the single map view
 
-import _ from 'lodash';
 import React, { PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import MG from 'metrics-graphics';
 
-import * as constants from '../constants';
-import * as actions from '../actions/map';
+import * as actions from '../actions/maps';
+
+import Graph from './shared/Graph';
 
 
 class Map extends React.Component {
     static PropTypes = {
         fetchMap: PropTypes.func.isRequired,
-        fetchMapHistory: PropTypes.func.isRequired
+        fetchMapPlayerHistory: PropTypes.func.isRequired
     }
 
     componentDidMount() {
         this.props.fetchMap(this.props.name);
-        this.props.fetchMapHistory(this.props.name);
-    }
-
-    componentDidUpdate() {
-        if (this.props.history.length > 0) {
-            const playerPoints = [];
-
-            _.each(this.props.history, (value) => {
-                playerPoints.push({
-                    date: new Date(value.datetime),
-                    value: value.players
-                });
-            });
-
-            MG.data_graphic(_.extend(_.clone(constants.GRAPH_OPTIONS), {
-                data: playerPoints,
-                target: '#player-graph'
-            }));
-        }
     }
 
     render() {
-        const { map } = this.props;
+        const { map, playerHistory } = this.props.data;
 
         return (<div id='map' className='content page'>
             <h2>{map.name}</h2>
@@ -60,8 +40,13 @@ class Map extends React.Component {
             </div>
 
             <div className='history'>
-                <h3>Player History</h3>
-                <div id="player-graph" className='graph'></div>
+                <Graph
+                    title='Player history'
+                    data={playerHistory}
+                    fetch={filters => {
+                        this.props.fetchMapPlayerHistory(this.props.name, filters);
+                    }}
+                />
             </div>
         </div>);
     }
@@ -69,16 +54,16 @@ class Map extends React.Component {
 
 
 @connect(state => ({
-    map: state.map.map,
-    history: state.map.history
+    data: state.map.data,
+    update: state.map.update
 }))
 export class MapContainer extends React.Component {
     render() {
-        const { map, history, dispatch, params } = this.props;
+        const { data, update, dispatch, params } = this.props;
 
         return <Map
-            map={map}
-            history={history}
+            data={data}
+            update={update}
             name={params.map}
             {...bindActionCreators(actions, dispatch)}
         />;

@@ -1,22 +1,69 @@
 // Source Server Stats
-// File: webpack/stores/games.js
+// File: sourcestats/webpack/stores/games.js
 // Desc: flux store for the games view
 
-import * as constants from '../constants';
+import {
+    FETCH_GAMES, FETCH_GAME,
+    FETCH_GAME_PLAYER_HISTORY
+} from '../actions/games';
 
-const initialState = {
-    games: [],
-    totalGames: 0
+import { parseDates } from './util';
+
+const initialGamesState = {
+    data: {
+        games: [],
+        totalGames: 0
+    },
+    update: 0
+};
+
+const initialGameState = {
+    data: {
+        game: {},
+        playerHistory: []
+    },
+    update: 0
 };
 
 
-export function games(state = initialState, action) {
+export function games(state = initialGamesState, action) {
+    let update = true;
+
     switch (action.type) {
-        case constants.FETCH_GAMES_GAMES:
-            state.games = action.games;
-            state.totalGames = action.total;
+        case FETCH_GAMES:
+            state.data.games = action.games;
+            state.data.totalGames = action.total;
             break;
+
+        default:
+            update = false;
     }
+
+    if (update)
+        state.update++;
+
+    return state;
+}
+
+
+export function game(state = initialGameState, action) {
+    let update = true;
+
+    switch (action.type) {
+        case FETCH_GAME:
+            state.data.game = action.game;
+            break;
+
+        case FETCH_GAME_PLAYER_HISTORY:
+            state.data.playerHistory = parseDates(action.players, 'players');
+            break;
+
+        default:
+            update = false;
+    }
+
+    if (update)
+        state.update++;
 
     return state;
 }

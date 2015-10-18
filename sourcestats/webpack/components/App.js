@@ -1,5 +1,5 @@
 // Source Server Stats
-// File: webpack/components/app.js
+// File: sourcestats/webpack/components/app.js
 // Desc: app container
 
 import React from 'react';
@@ -18,6 +18,7 @@ export class AppContainer extends React.Component {
                     <li><Link to={'/servers'}>Servers</Link></li>
                     <li><Link to={'/maps'}>Maps</Link></li>
                     <li><Link to={'/games'}>Games</Link></li>
+                    <li><Link to={'/global'}>Global</Link></li>
                 </ul>
 
                 <ul className="nav right">

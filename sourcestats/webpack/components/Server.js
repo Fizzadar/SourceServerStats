@@ -1,64 +1,33 @@
 // Source Server Stats
-// File: webpack/components/Server.js
+// File: sourcestats/webpack/components/Server.js
 // Desc: the single server view
 
-import _ from 'lodash';
 import React, { PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import MG from 'metrics-graphics';
 
-import * as constants from '../constants';
-import * as actions from '../actions/server';
+import * as actions from '../actions/servers';
+
+import Graph from './shared/Graph';
 
 
 class Server extends React.Component {
     static PropTypes = {
         fetchServer: PropTypes.func.isRequired,
         fetchServerMaps: PropTypes.func.isRequired,
-        fetchServerHistory: PropTypes.func.isRequired
+        fetchServerPlayers: PropTypes.func.isRequired,
+        fetchServerPingHistory: PropTypes.func.isRequired,
+        fetchServerPlayerHistory: PropTypes.func.isRequired
     }
 
     componentDidMount() {
         this.props.fetchServer(this.props.hash);
         this.props.fetchServerMaps(this.props.hash);
-        this.props.fetchServerHistory(this.props.hash);
-    }
-
-    componentDidUpdate() {
-        if (this.props.history.length > 0) {
-            const playerPoints = [];
-            const pingPoints = [];
-
-            _.each(this.props.history, (value) => {
-                const date = new Date(value.datetime);
-
-                playerPoints.push({
-                    date: date,
-                    value: value.players
-                });
-
-                pingPoints.push({
-                    date: date,
-                    value: value.ping
-                });
-            });
-
-            MG.data_graphic(_.extend(_.clone(constants.GRAPH_OPTIONS), {
-                data: playerPoints,
-                target: '#player-graph'
-            }));
-
-            MG.data_graphic(_.extend(_.clone(constants.GRAPH_OPTIONS), {
-                data: pingPoints,
-                target: '#ping-graph'
-            }));
-        }
     }
 
     render() {
-        const { server, maps } = this.props;
+        const { server, topMaps, playerHistory, pingHistory } = this.props.data;
 
         return (<div id='server' className='content page'>
             <h2>{server.name}</h2>
@@ -87,19 +56,29 @@ class Server extends React.Component {
                 </ul>
 
                 <ul className='maps split'>
-                    <li className='title'>Maps seen on this server</li>
-                    {maps.map(map => <li key={map}>
+                    <li className='title'>Top maps</li>
+                    {topMaps.map(map => <li key={map}>
                         <Link to={`/map/${map}`}>{map}</Link>
                     </li>)}
                 </ul>
             </div>
 
             <div className='history'>
-                <h3>Player History</h3>
-                <div id='player-graph' className='graph'></div>
+                <Graph
+                    title='Player history'
+                    data={playerHistory}
+                    fetch={filters => {
+                        this.props.fetchServerPlayerHistory(this.props.hash, filters);
+                    }}
+                />
 
-                <h3>Ping History</h3>
-                <div id='ping-graph' className='graph'></div>
+                <Graph
+                    title='Ping history'
+                    data={pingHistory}
+                    fetch={filters => {
+                        this.props.fetchServerPingHistory(this.props.hash, filters);
+                    }}
+                />
             </div>
         </div>);
     }
@@ -107,18 +86,16 @@ class Server extends React.Component {
 
 
 @connect(state => ({
-    server: state.server.server,
-    maps: state.server.maps,
-    history: state.server.history
+    data: state.server.data,
+    update: state.server.update
 }))
 export class ServerContainer extends React.Component {
     render() {
-        const { server, maps, history, dispatch, params } = this.props;
+        const { data, update, dispatch, params } = this.props;
 
         return <Server
-            server={server}
-            maps={maps}
-            history={history}
+            data={data}
+            update={update}
             hash={params.hash}
             {...bindActionCreators(actions, dispatch)}
         />;

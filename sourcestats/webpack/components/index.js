@@ -1,8 +1,10 @@
 // Source Server Stats
-// File: webpack/components/index.js
+// File: sourcestats/webpack/components/index.js
 // Desc: all the components!
 
 export { AppContainer } from './App';
+
+export { GlobalContainer } from './Global';
 
 // Lists
 export { ServersContainer } from './Servers';

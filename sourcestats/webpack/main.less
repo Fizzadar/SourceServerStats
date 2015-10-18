@@ -1,5 +1,5 @@
 // Source Server Stats
-// File: webpack/main.less
+// File: sourcestats/webpack/main.less
 // Desc: the styles!
 
 @lightBlack: #444;
@@ -36,6 +36,10 @@ a {
 
 .green {
     color: @green;
+}
+
+.right {
+    float: right;
 }
 
 .mg-active-datapoint, .mg-x-axis text, .mg-y-axis text {
@@ -315,7 +319,8 @@ div.page {
         }
 
         .graph {
-            margin-top: -30px;
+            padding-bottom: 30px;
+            min-height: 75px;
         }
     }
 }
