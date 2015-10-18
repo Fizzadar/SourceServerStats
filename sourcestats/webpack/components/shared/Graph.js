@@ -14,8 +14,7 @@ export const GRAPH_OPTIONS = {
     height: 200,
     full_width: true,
     right: 0,
-    show_secondary_x_label: false,
-    custom_line_color_map: [2, 4, 5]
+    show_secondary_x_label: false
 };
 
 

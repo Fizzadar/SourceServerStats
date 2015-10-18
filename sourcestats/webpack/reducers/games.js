@@ -4,6 +4,7 @@
 
 import {
     FETCH_GAMES, FETCH_GAME,
+    FETCH_GAME_TOP_MAPS,
     FETCH_GAME_PLAYER_HISTORY
 } from '../actions/games';
 
@@ -20,6 +21,8 @@ const initialGamesState = {
 const initialGameState = {
     data: {
         game: {},
+        maps: [],
+        totalMaps: 0,
         playerHistory: []
     },
     update: 0
@@ -56,6 +59,11 @@ export function game(state = initialGameState, action) {
 
         case FETCH_GAME_PLAYER_HISTORY:
             state.data.playerHistory = parseDates(action.players, 'players');
+            break;
+
+        case FETCH_GAME_TOP_MAPS:
+            state.data.maps = action.maps;
+            state.data.totalMaps = action.total;
             break;
 
         default:

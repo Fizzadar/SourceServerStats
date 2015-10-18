@@ -35,7 +35,7 @@ class Maps extends React.Component {
         query = query || {};
 
         this.props.fetchGames();
-        this.props.fetchMaps(query.game_id);
+        this.props.fetchMaps({size: 0, game_id: query.game_id});
 
         if (query.query)
             this.setState({
@@ -51,9 +51,6 @@ class Maps extends React.Component {
                 this.setState({
                     nameFilter: ''
                 });
-
-            if (this.props.gameId)
-                this.props.fetchMaps();
         }
     }
 
@@ -77,7 +74,7 @@ class Maps extends React.Component {
     }
 
     handleGameFilter(value) {
-        this.props.fetchMaps(value);
+        this.props.fetchMaps({size: 0, game_id: value});
         this.updateQuery('game_id', value);
     }
 

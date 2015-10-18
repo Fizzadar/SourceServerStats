@@ -7,15 +7,16 @@ import URI from 'URIjs';
 
 export const FETCH_GAMES = 'FETCH_GAMES';
 export const FETCH_GAME = 'FETCH_GAME';
+export const FETCH_GAME_TOP_MAPS = 'FETCH_GAME_TOP_MAPS';
 export const FETCH_GAME_PLAYER_HISTORY = 'FETCH_GAME_PLAYER_HISTORY';
 
 
 /** Fetches the full list of games. */
-export function fetchGames() {
-    let url = new URI('/api/v1/games');
+export function fetchGames(filters = {}) {
+    const url = new URI('/api/v1/games');
 
     return dispatch => {
-        fetch(url)
+        fetch(url.query(filters))
         .then(response => response.json())
         .then(response => {
             dispatch({
@@ -29,7 +30,7 @@ export function fetchGames() {
 
 /** Fetches details for a single game. */
 export function fetchGame(gameId) {
-    let url = new URI(`/api/v1/game/${gameId}`);
+    const url = new URI(`/api/v1/game/${gameId}`);
 
     return dispatch => {
         fetch(url)
@@ -44,9 +45,25 @@ export function fetchGame(gameId) {
 }
 
 
+/** Fetches all maps seen on this server. */
+export function fetchGameMaps(gameId, filters ={}) {
+    const url = new URI(`/api/v1/game/${gameId}/top/maps`);
+
+    return dispatch => {
+        fetch(url.query(filters))
+        .then(response => response.json())
+        .then(response => dispatch({
+            type: FETCH_GAME_TOP_MAPS,
+            maps: response.maps,
+            total: response.total
+        }));
+    };
+}
+
+
 /** Fetches a date histogram of player counts for a single game. */
-export function fetchGamePlayerHistory(gameId, filters) {
-    let url = new URI(`/api/v1/game/${gameId}/history/players`);
+export function fetchGamePlayerHistory(gameId, filters = {}) {
+    const url = new URI(`/api/v1/game/${gameId}/history/players`);
 
     return dispatch => {
         fetch(url.query(filters))

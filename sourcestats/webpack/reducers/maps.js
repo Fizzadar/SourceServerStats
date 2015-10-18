@@ -38,7 +38,6 @@ export function maps(state = initialMapsState, action) {
         case FETCH_MAPS:
             state.data.maps = action.maps;
             state.data.totalMaps = action.total;
-            state.data.gameId = action.gameId;
             break;
 
         case FETCH_GAMES:

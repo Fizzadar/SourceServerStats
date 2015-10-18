@@ -50,22 +50,22 @@ class Server extends React.Component {
                     </li>
                 </ul>
 
-                <ul className='players split'>
-                    <li className='title'>Current players</li>
-                    {server.players.map(player => <li key={player.name}>{player.name}</li>)}
-                </ul>
-
                 <ul className='maps split'>
                     <li className='title'>Top maps</li>
                     {topMaps.map(map => <li key={map}>
                         <Link to={`/map/${map}`}>{map}</Link>
                     </li>)}
                 </ul>
+
+                <ul className='players split'>
+                    <li className='title'>Current players</li>
+                    {server.players.map(player => <li key={player.name}>{player.name}</li>)}
+                </ul>
             </div>
 
             <div className='history'>
                 <Graph
-                    title='Player history'
+                    title='Player count / time'
                     data={playerHistory}
                     fetch={filters => {
                         this.props.fetchServerPlayerHistory(this.props.hash, filters);
@@ -73,7 +73,7 @@ class Server extends React.Component {
                 />
 
                 <Graph
-                    title='Ping history'
+                    title='Ping count / time'
                     data={pingHistory}
                     fetch={filters => {
                         this.props.fetchServerPingHistory(this.props.hash, filters);

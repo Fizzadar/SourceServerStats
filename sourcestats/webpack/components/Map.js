@@ -30,7 +30,7 @@ class Map extends React.Component {
 
             <div className='info'>
                 <ul className='split'>
-                    <li className='title'>Games this map has appeared in</li>
+                    <li className='title'>{map.games.length.toLocaleString()} games this map has appeared in</li>
                     {map.games.map(game => <li key={game}>
                         <Link to={`/game/${game[0][0]}`}>
                             {game[0][1]}
@@ -41,7 +41,7 @@ class Map extends React.Component {
 
             <div className='history'>
                 <Graph
-                    title='Player history'
+                    title='Player count / time'
                     data={playerHistory}
                     fetch={filters => {
                         this.props.fetchMapPlayerHistory(this.props.name, filters);

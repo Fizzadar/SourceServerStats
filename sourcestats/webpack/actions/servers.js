@@ -29,14 +29,14 @@ export function filterServers(filters = {}) {
 var lock = false;
 
 /** Fetches servers with our current filters. */
-export function fetchServers() {
+export function fetchServers(filters = {}) {
     // If the fetch lock is on, return no action. The component will blindly call this.
     if (lock)
         return {};
 
     lock = true;
     let url = new URI('/api/v1/servers');
-    let params = {};
+    let params = filters;
 
     return (dispatch, getState) => {
         const state = getState();

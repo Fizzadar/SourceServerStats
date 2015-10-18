@@ -29,7 +29,7 @@ class Games extends React.Component {
         let { query } = this.context.location;
         query = query || {};
 
-        this.props.fetchGames();
+        this.props.fetchGames({size: 0});
 
         if (query.query)
             this.setState({
