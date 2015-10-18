@@ -7,3 +7,4 @@ autostart=true
 autorestart=true
 user=sourcestats
 numprocs=1
+environment=ENV='{{ host.data.env }}'
