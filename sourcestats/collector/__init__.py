@@ -179,8 +179,6 @@ def collect():
     # Remove any blacklisted addresses
     addresses_copy -= address_blacklist
 
-    addresses_copy = list(addresses_copy)[:500]
-
     n_addresses = len(addresses_copy)
 
     logger.info(
