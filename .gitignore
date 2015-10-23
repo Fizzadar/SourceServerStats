@@ -1,6 +1,8 @@
 node_modules/
 *.pyc
 .DS_Store
-sourcestats/static/dist/
 .venv
 .vagrant
+
+sourcestats/static/dist/
+.sourcestats_cache
