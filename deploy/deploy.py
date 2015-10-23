@@ -3,7 +3,7 @@
 # Desc: pyinfra deploy script, targets Ubuntu
 
 from pyinfra import host
-from pyinfra.modules import server, files, apt, pip, init, git, local
+from pyinfra.modules import server, files, apt, pip, init, git
 
 
 # Install system packages
@@ -11,10 +11,9 @@ apt.packages(
     [
         'wget', 'git', 'curl',
         'python-pip', 'python-dev',
-        'openjdk-7-jre-headless', 'nginx', 'supervisor'
+        'openjdk-7-jre-headless', 'nginx', 'supervisor', 'redis-server'
     ],
-    update=True,
-    cache_time=3600,
+    update=True, cache_time=3600,
     sudo=True
 )
 
@@ -34,9 +33,7 @@ server.shell(
 
 # Setup user
 server.user(
-    'sourcestats',
-    home='/home/sourcestats',
-    shell='/bin/bash',
+    'sourcestats', home='/home/sourcestats', shell='/bin/bash',
     sudo=True
 )
 
@@ -52,8 +49,7 @@ for directory in [host.data.app_dir, host.data.env_dir]:
 if not host.file('{0}/bin/activate'.format(host.data.env_dir)):
     server.shell(
         'virtualenv {0}'.format(host.data.env_dir),
-        sudo=True,
-        sudo_user='sourcestats'
+        sudo=True, sudo_user='sourcestats'
     )
 
 # This is all covered by the synced Vagrant folder
@@ -62,25 +58,16 @@ if host.data.env != 'dev':
     git.repo(
         'https://github.com/Fizzadar/SourceServerStats',
         host.data.app_dir,
-        branch='develop',
+        branch=host.data.sourcestats_branch,
         pull=True,
-        sudo=True,
-        sudo_user='sourcestats'
-    )
-
-    # Build webpack locally
-    local.shell(
-        'rm -rf sourcestats/static/dist/',
-        'grunt build',
-        run_once=True
+        sudo=True, sudo_user='sourcestats'
     )
 
     # Sync static/dist directories
     files.sync(
         '../sourcestats/static/dist',
         '{0}/sourcestats/static/dist'.format(host.data.app_dir),
-        user='sourcestats',
-        group='sourcestats',
+        user='sourcestats', group='sourcestats',
         delete=True,
         sudo=True
     )
@@ -89,8 +76,7 @@ if host.data.env != 'dev':
 pip.packages(
     requirements='{0}/requirements.pip'.format(host.data.app_dir),
     venv=host.data.env_dir,
-    sudo=True,
-    sudo_user='sourcestats'
+    sudo=True, sudo_user='sourcestats'
 )
 
 # Remove default Nginx config
@@ -106,11 +92,13 @@ files.template(
 )
 
 # Start Elasticsearch
-init.d(
-    'elasticsearch',
-    running=True,
-    sudo=True
-)
+for service in ('elasticsearch', 'redis-server'):
+    init.d(
+        service,
+        running=True,
+        sudo=True
+    )
+
 # ...wait for ES to come online
 server.wait(
     port=9200
@@ -125,8 +113,17 @@ init.d(
 
 # Create/setup servers index
 server.shell(
-    'cd /opt/sourcestats && /opt/env/sourcestats/bin/python manage.py setup_index'
+    '''
+    cd /opt/sourcestats && \
+    ENV={0} /opt/env/sourcestats/bin/python manage.py setup_index
+    '''.format(host.data.env)
 )
+
+# server.shell(
+#     '/opt/env/sourcestats/bin/python manage.py setup_index',
+#     env={'env': host.data.env}, chdir='/opt/sourcestats'
+# )
+
 
 # No supervisor tasks in dev
 if host.data.env != 'dev':
@@ -138,15 +135,15 @@ if host.data.env != 'dev':
     )
 
     # Upload collector supervisor config
-    files.put(
-        'files/api.supervisor.conf',
+    files.template(
+        'templates/api.supervisor.conf.jn2',
         '/etc/supervisor/conf.d/api.conf',
         sudo=True
     )
 
     # Upload API supervisor config
-    files.put(
-        'files/collector.supervisor.conf',
+    files.template(
+        'templates/collector.supervisor.conf.jn2',
         '/etc/supervisor/conf.d/collector.conf',
         sudo=True
     )
@@ -164,7 +161,6 @@ else:
     files.template(
         'templates/vagrant.bash_profile.jn2',
         '/home/vagrant/.bash_profile',
-        user='vagrant',
-        group='vagrant',
+        user='vagrant', group='vagrant',
         sudo=True
     )
