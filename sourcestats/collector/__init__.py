@@ -138,9 +138,9 @@ def _collect_stats(address):
         }
 
         # We're only interested in source apps
-        # if stats['info']['app_id'] not in source_apps:
-        #     blacklist('as not source')
-        #     return
+        if stats['info']['app_id'] not in source_apps:
+            blacklist('as not source')
+            return
 
         # Index the stats in indexer greenlet
         index_queue.put_nowait((address, stats))
