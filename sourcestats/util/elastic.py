@@ -116,8 +116,43 @@ def get_es_terms(field_name, filters=None, size=None, index=settings.SERVERS_IND
     return objects, total
 
 
-def get_es_history(
-    interval='15m', filters=None,
+def get_es_history(fields, filters=None, interval='5m', aggregate_func=Aggregate.avg):
+    fields = [fields] if isinstance(fields, basestring) else fields
+
+    q = get_es_query(index=settings.HISTORY_INDEXES)
+    q.size(0)
+
+    if filters:
+        q.filter(Filter.and_(*filters))
+
+    aggregates = []
+
+    for field in fields:
+        aggregates.append(aggregate_func(field, field))
+
+    # Put the aggregates inside a date_histogram
+    q.aggregate(
+        Aggregate.date_histogram('times', 'datetime', interval).aggregate(*aggregates)
+    )
+
+    results = q.get()
+
+    date_histogram = []
+    for bucket in results['aggregations']['times']['buckets']:
+        date_bucket = {
+            'datetime': bucket['key_as_string']
+        }
+
+        for field in fields:
+            date_bucket[field] = bucket[field]['value']
+
+        date_histogram.append(date_bucket)
+
+    return date_histogram
+
+
+def get_es_history_old(
+    interval='5m', filters=None,
     include_ping=False, include_servers=False, include_players=False
 ):
     q = get_es_query(index=settings.HISTORY_INDEXES)
@@ -127,6 +162,8 @@ def get_es_history(
         q.filter(Filter.and_(*filters))
 
     aggregates = []
+
+    # Stats are collected on minimum 5 minute interval
 
     # Because stats aren't collected on a fixed interval, we can't sum the player_count
     # field as it will result in duplicates. So here we do a cardinality aggregate

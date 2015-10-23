@@ -12,7 +12,7 @@ import {
 } from '../actions/servers';
 import { FETCH_GAMES } from '../actions/games';
 
-import { parseDates } from './util';
+import { parseDates } from '../util';
 
 const initialServerState = {
     data: {
@@ -58,7 +58,7 @@ export function server(state = initialServerState, action) {
             break;
 
         case FETCH_SERVER_PLAYER_HISTORY:
-            state.data.playerHistory = parseDates(action.players, 'players');
+            state.data.playerHistory = parseDates(action.players, 'player_count');
             break;
 
         case FETCH_SERVER_PING_HISTORY:

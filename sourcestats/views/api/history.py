@@ -3,6 +3,7 @@
 # Desc: global history views
 
 from flask import jsonify
+from elasticquery import Aggregate
 
 from ...app import app
 from ...util.elastic import get_es_history, get_request_filters
@@ -12,8 +13,8 @@ from ...util.elastic import get_es_history, get_request_filters
 def get_server_history():
     '''Returns a date histogram of server count across everything.'''
     date_histogram = get_es_history(
-        filters=get_request_filters(),
-        include_servers=True
+        'server_hash', get_request_filters(),
+        aggregate_func=Aggregate.cardinality
     )
 
     return jsonify(servers=date_histogram)
@@ -23,7 +24,8 @@ def get_server_history():
 def get_player_history():
     '''Returns a date histogram of player count across everything.'''
     date_histogram = get_es_history(
-        filters=get_request_filters(),
-        include_players=True
+        'player_count', get_request_filters(),
+        aggregate_func=Aggregate.sum
     )
+
     return jsonify(players=date_histogram)

@@ -61,9 +61,6 @@ def get_game_history(game_id):
     filters = get_request_filters()
     filters.append(Filter.term('game_id', game_id))
 
-    date_histogram = get_es_history(
-        filters=filters,
-        include_players=True
-    )
+    date_histogram = get_es_history('player_count', filters)
 
     return jsonify(players=date_histogram)

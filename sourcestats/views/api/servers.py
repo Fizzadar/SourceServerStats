@@ -62,7 +62,14 @@ def get_servers():
 
     # Manual query
     if 'query' in request.args:
-        queries.append(Query.simple_query_string(request.args['query']))
+        query = request.args['query']
+
+        # Make query partial-match when over 3 chars
+        if len(query) >= 3:
+            if not query.endswith('*'):
+                query = '{0}*'.format(query)
+
+        queries.append(Query.simple_query_string(query))
 
     if queries:
         q.query(Query.bool(must=queries))
@@ -113,10 +120,8 @@ def get_server_history_players(server_hash):
     filters = get_request_filters()
     filters.append(Filter.term('server_hash', server_hash))
 
-    date_histogram = get_es_history(
-        filters=filters,
-        include_players=True
-    )
+    date_histogram = get_es_history('player_count', filters)
+
     return jsonify(players=date_histogram)
 
 
@@ -125,10 +130,8 @@ def get_server_history_ping(server_hash):
     filters = get_request_filters()
     filters.append(Filter.term('server_hash', server_hash))
 
-    date_histogram = get_es_history(
-        filters=filters,
-        include_ping=True
-    )
+    date_histogram = get_es_history('ping', filters)
+
     return jsonify(pings=date_histogram)
 
 

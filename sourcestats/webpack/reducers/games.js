@@ -8,7 +8,7 @@ import {
     FETCH_GAME_PLAYER_HISTORY
 } from '../actions/games';
 
-import { parseDates } from './util';
+import { parseDates } from '../util';
 
 const initialGamesState = {
     data: {
@@ -58,7 +58,7 @@ export function game(state = initialGameState, action) {
             break;
 
         case FETCH_GAME_PLAYER_HISTORY:
-            state.data.playerHistory = parseDates(action.players, 'players');
+            state.data.playerHistory = parseDates(action.players, 'player_count');
             break;
 
         case FETCH_GAME_TOP_MAPS:

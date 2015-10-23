@@ -50,8 +50,6 @@ def get_map_player_history(name):
     filters = get_request_filters()
     filters.append(Filter.term('map', name))
 
-    date_histogram = get_es_history(
-        filters=filters,
-        include_players=True
-    )
+    date_histogram = get_es_history('player_count', filters)
+
     return jsonify(players=date_histogram)

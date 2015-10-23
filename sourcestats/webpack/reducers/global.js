@@ -11,7 +11,7 @@ import { FETCH_MAPS } from '../actions/maps';
 import { FETCH_GAMES } from '../actions/games';
 import { FETCH_SERVERS } from '../actions/servers';
 
-import { parseDates } from './util';
+import { parseDates } from '../util';
 
 const initialHistoryState = {
     data: {
@@ -31,11 +31,11 @@ export function global(state = initialHistoryState, action) {
 
     switch(action.type) {
         case FETCH_SERVER_HISTORY:
-            state.data.serverHistory = parseDates(action.servers, 'servers');
+            state.data.serverHistory = parseDates(action.servers, 'server_hash');
             break;
 
         case FETCH_PLAYER_HISTORY:
-            state.data.playerHistory = parseDates(action.players, 'players');
+            state.data.playerHistory = parseDates(action.players, 'player_count');
             break;
 
         case FETCH_MAPS:
