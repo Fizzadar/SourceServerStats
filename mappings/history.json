@@ -34,19 +34,9 @@
                 "type": "integer",
                 "doc_values": true
             },
-            "players": {
-                "type": "nested",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "index": "not_analyzed",
-                        "doc_values": true
-                    },
-                    "score": {
-                        "type": "integer",
-                        "doc_values": true
-                    }
-                }
+            "player_ratio": {
+                "type": "float",
+                "doc_values": true
             }
         }
     }

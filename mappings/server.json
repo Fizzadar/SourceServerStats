@@ -26,7 +26,8 @@
                 "doc_values": true
             },
             "name": {
-                "type": "string"
+                "type": "string",
+                "search_analyzer": "english"
             },
             "game_id": {
                 "type": "integer",
@@ -58,6 +59,10 @@
             },
             "player_count": {
                 "type": "integer",
+                "doc_values": true
+            },
+            "player_ratio": {
+                "type": "float",
                 "doc_values": true
             },
             "players": {

@@ -8,23 +8,23 @@ ENV = os.environ.get('ENV', 'dev')
 DEBUG = ENV == 'dev'
 
 # Number of servers to collect from in parallel
-PARALLEL = 500
+PARALLEL = 100
 
-# Loop intervals (+time to execute!)
-COLLECT_INTERVAL = 30
+# Loop intervals
+COLLECT_INTERVAL = 300
 FIND_INTERVAL = 300
 
 # Timeout for reading addresses via UDP from Valve
 MASTER_TIMEOUT = 30
 # Timeout for reading status from gameservers
-SERVER_TIMEOUT = 10
+SERVER_TIMEOUT = 2
 
 # Batch size for indexing documents in ES
-ES_BATCH = 1000
+ES_BATCH = 5000
 # Default number of terms to aggregate in ES (/players)
 ES_TERMS = 50
 ES_INDEX = 'sourcestats'
-ES_HOSTS = ['10.10.10.10:9200']
+ES_HOSTS = ['localhost:9200']
 
 # The servers ES index (alias to versioned)
 SERVERS_INDEX = 'sourcestats_servers'
@@ -32,6 +32,10 @@ SERVERS_INDEX = 'sourcestats_servers'
 HISTORY_INDEXES = 'sourcestats_history'
 # Date format for ES indexes
 INDEX_DATE_FORMAT = '%Y%m%d'
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_ADDRESS_SET = 'sourcestats-addresses'
 
 #VALVE_HOSTS = ['hl2master.steampowered.com']
 VALVE_HOSTS = [

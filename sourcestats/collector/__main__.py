@@ -7,12 +7,28 @@ monkey.patch_all()
 
 import sys
 import logging
+import time
 
 import gevent
 from coloredlogs import ColoredStreamHandler
 
-from .. import logger
-from . import find, collect, index
+from sourcestats import settings, logger
+
+from . import find, collect, wait_for_collect, load_cached_addresses
+
+
+def _run_loop(function, interval):
+    '''
+    Like setInterval, slight time drift as usual, useful in tasks as well as here, borrowed
+    from github.com/Oxygem/pytask.
+    '''
+    while True:
+        before = time.time()
+        function()
+
+        duration = time.time() - before
+        if duration < interval:
+            gevent.sleep(interval - duration)
 
 
 if __name__ == '__main__':
@@ -27,12 +43,17 @@ if __name__ == '__main__':
     logger.setLevel(log_level)
     logger.addHandler(handler)
 
-    logger.info('Starting find, collect & index workers...')
+    n_addresses = load_cached_addresses()
+    logger.info('Loaded {0} cached addresses'.format(n_addresses))
+
+    logger.info('Starting find & collect workers...')
+
+    # Waits for the previous instance had completed a collection run within COLLECT_INTERVAL
+    wait_for_collect()
 
     greenlets = [
-        gevent.spawn(find),
-        gevent.spawn(collect),
-        gevent.spawn(index)
+        gevent.spawn(lambda: _run_loop(find, settings.FIND_INTERVAL)),
+        gevent.spawn(lambda: _run_loop(collect, settings.COLLECT_INTERVAL))
     ]
 
     try:
