@@ -3,7 +3,7 @@
 # Desc: game API views
 
 from flask import jsonify, request
-from elasticquery import Filter
+from elasticquery import Filter, Aggregate
 
 from ... import settings
 from ...app import app
@@ -61,6 +61,9 @@ def get_game_history(game_id):
     filters = get_request_filters()
     filters.append(Filter.term('game_id', game_id))
 
-    date_histogram = get_es_history('player_count', filters)
+    date_histogram = get_es_history(
+        'player_count', filters,
+        aggregate_func=Aggregate.sum
+    )
 
     return jsonify(players=date_histogram)

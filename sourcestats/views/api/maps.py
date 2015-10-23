@@ -3,7 +3,7 @@
 # Desc: map API views
 
 from flask import jsonify, request
-from elasticquery import Filter
+from elasticquery import Filter, Aggregate
 
 from ...app import app
 from ...util import get_source_apps
@@ -50,6 +50,9 @@ def get_map_player_history(name):
     filters = get_request_filters()
     filters.append(Filter.term('map', name))
 
-    date_histogram = get_es_history('player_count', filters)
+    date_histogram = get_es_history(
+        'player_count', filters,
+        aggregate_func=Aggregate.sum
+    )
 
     return jsonify(players=date_histogram)
