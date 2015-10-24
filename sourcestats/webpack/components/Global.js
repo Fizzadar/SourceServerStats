@@ -55,15 +55,15 @@ class Global extends React.Component {
 
             <div className='history'>
                 <Graph
-                    title='Server count / time'
-                    data={serverHistory}
-                    fetch={this.props.fetchServerHistory}
-                />
-
-                <Graph
                     title='Player count / time'
                     data={playerHistory}
                     fetch={this.props.fetchPlayerHistory}
+                />
+
+                <Graph
+                    title='Server count / time'
+                    data={serverHistory}
+                    fetch={this.props.fetchServerHistory}
                 />
             </div>
         </div>);
