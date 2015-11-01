@@ -4,7 +4,9 @@
 
 from __future__ import division
 
+import sys
 import json
+import traceback
 from time import time
 from datetime import datetime
 from collections import deque
@@ -164,6 +166,14 @@ def _collect_stats(address):
     except (NoResponseError, BrokenMessageError):
         # UDP is flakey
         pass
+
+    # Dump trace/warn, but don't raise the exception
+    except Exception as e:
+        error_type, value, trace = sys.exc_info()
+        print '----------------------'
+        traceback.print_tb(trace)
+        logger.critical('{0}: {1}'.format(error_type.__name__, value))
+        print '----------------------'
 
 
 def collect():
