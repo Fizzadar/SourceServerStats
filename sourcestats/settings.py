@@ -8,7 +8,7 @@ ENV = os.environ.get('ENV', 'dev')
 DEBUG = ENV == 'dev'
 
 # Number of servers to collect from in parallel
-PARALLEL = 100
+PARALLEL = 200
 
 # Loop intervals
 COLLECT_INTERVAL = 300

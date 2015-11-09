@@ -1,4 +1,5 @@
 env = 'dev'
+branch = 'develop'
 
 # Vagrant box SSH details
 ssh_user = 'vagrant'
