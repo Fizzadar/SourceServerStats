@@ -8,7 +8,10 @@ from elasticquery import Filter, Aggregate
 from ... import settings
 from ...app import app
 from ...util import get_source_apps
-from ...util.elastic import get_es_history, get_es_terms, get_request_filters
+from ...util.elastic import (
+    get_es_history, get_es_terms,
+    get_request_filters, get_request_interval
+)
 
 
 @app.route('/api/v1/games')
@@ -63,6 +66,7 @@ def get_game_history(game_id):
 
     date_histogram = get_es_history(
         'player_count', filters,
+        interval=get_request_interval(),
         aggregate_func=Aggregate.sum
     )
 

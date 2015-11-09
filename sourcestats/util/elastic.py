@@ -4,7 +4,7 @@
 
 from datetime import datetime, timedelta
 
-from flask import request
+from flask import request, g
 from elasticsearch import Elasticsearch
 from elasticquery import ElasticQuery, Aggregate, Filter
 from dateutil.parser import parse as parse_date
@@ -32,8 +32,9 @@ def get_es_query(index=settings.SERVERS_INDEX):
     )
 
 
-def get_request_filters():
-    filters = []
+def _get_since():
+    if hasattr(g, 'request_since'):
+        return g.request_since
 
     since = None
 
@@ -50,6 +51,30 @@ def get_request_filters():
 
     # ES mapping format has no microsecond
     since = since.replace(microsecond=0)
+
+    # Cache for current request & return
+    g.request_since = since
+    return since
+
+
+def _delta(**kwargs):
+    return (datetime.utcnow() - timedelta(**kwargs)).replace(microsecond=0)
+
+def get_request_interval():
+    since = _get_since()
+
+    if since >= _delta(days=1):
+        return '5m'
+    elif since >= _delta(days=7):
+        return '15m'
+
+    return '30m'
+
+
+def get_request_filters():
+    filters = []
+
+    since = _get_since()
     filters.append(Filter.range('datetime', gte=since))
 
     for field in [
@@ -145,60 +170,6 @@ def get_es_history(fields, filters=None, interval='5m', aggregate_func=Aggregate
 
         for field in fields:
             date_bucket[field] = bucket[field]['value']
-
-        date_histogram.append(date_bucket)
-
-    return date_histogram
-
-
-def get_es_history_old(
-    interval='5m', filters=None,
-    include_ping=False, include_servers=False, include_players=False
-):
-    q = get_es_query(index=settings.HISTORY_INDEXES)
-    q.size(0)
-
-    if filters:
-        q.filter(Filter.and_(*filters))
-
-    aggregates = []
-
-    # Stats are collected on minimum 5 minute interval
-
-    # Because stats aren't collected on a fixed interval, we can't sum the player_count
-    # field as it will result in duplicates. So here we do a cardinality aggregate
-    # on the player names to get an accurate # of players per interval.
-    if include_players:
-        aggregates.append(Aggregate.nested('players', 'players').aggregate(
-            Aggregate.cardinality('player_count', 'players.name')
-        ))
-
-    if include_ping:
-        aggregates.append(Aggregate.avg('ping', 'ping'))
-
-    if include_servers:
-        aggregates.append(Aggregate.cardinality('servers', 'server_hash'))
-
-    q.aggregate(
-        Aggregate.date_histogram('times', 'datetime', interval).aggregate(*aggregates)
-    )
-
-    results = q.get()
-
-    date_histogram = []
-    for bucket in results['aggregations']['times']['buckets']:
-        date_bucket = {
-            'datetime': bucket['key_as_string']
-        }
-
-        if include_players:
-            date_bucket['players'] = bucket['players']['player_count']['value']
-
-        if include_ping:
-            date_bucket['ping'] = bucket['ping']['value']
-
-        if include_servers:
-            date_bucket['servers'] = bucket['servers']['value']
 
         date_histogram.append(date_bucket)
 

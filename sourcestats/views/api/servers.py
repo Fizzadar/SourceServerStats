@@ -13,7 +13,7 @@ from ...app import app
 from ...util import api_abort, get_source_apps
 from ...util.elastic import (
     get_es_query, get_es_client, get_request_filters,
-    get_es_history, get_es_terms
+    get_es_history, get_es_terms, get_request_interval
 )
 
 
@@ -120,7 +120,10 @@ def get_server_history_players(server_hash):
     filters = get_request_filters()
     filters.append(Filter.term('server_hash', server_hash))
 
-    date_histogram = get_es_history('player_count', filters)
+    date_histogram = get_es_history(
+        'player_count', filters,
+        interval=get_request_interval()
+    )
 
     return jsonify(players=date_histogram)
 
@@ -130,7 +133,10 @@ def get_server_history_ping(server_hash):
     filters = get_request_filters()
     filters.append(Filter.term('server_hash', server_hash))
 
-    date_histogram = get_es_history('ping', filters)
+    date_histogram = get_es_history(
+        'ping', filters,
+        interval=get_request_interval()
+    )
 
     return jsonify(pings=date_histogram)
 
