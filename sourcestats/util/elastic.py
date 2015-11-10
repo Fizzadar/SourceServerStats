@@ -13,6 +13,7 @@ from .. import settings
 from .request import in_request_args
 
 ES_CLIENT = None
+DEFAULT_INTERVAL = 5
 
 
 def get_es_client():
@@ -64,11 +65,11 @@ def get_request_interval():
     since = _get_since()
 
     if since >= _delta(days=1):
-        return '5m'
+        return DEFAULT_INTERVAL
     elif since >= _delta(days=7):
-        return '15m'
+        return 15
 
-    return '30m'
+    return 30
 
 
 def get_request_filters():
@@ -141,7 +142,10 @@ def get_es_terms(field_name, filters=None, size=None, index=settings.SERVERS_IND
     return objects, total
 
 
-def get_es_history(fields, filters=None, interval='5m', aggregate_func=Aggregate.avg):
+def get_es_history(
+    fields, filters=None,
+    interval=DEFAULT_INTERVAL, aggregate_func=Aggregate.avg
+):
     fields = [fields] if isinstance(fields, basestring) else fields
 
     q = get_es_query(index=settings.HISTORY_INDEXES)
@@ -157,10 +161,17 @@ def get_es_history(fields, filters=None, interval='5m', aggregate_func=Aggregate
 
     # Put the aggregates inside a date_histogram
     q.aggregate(
-        Aggregate.date_histogram('times', 'datetime', interval).aggregate(*aggregates)
+        Aggregate.date_histogram(
+            'times', 'datetime', '{0}m'.format(interval)
+        ).aggregate(*aggregates)
     )
 
     results = q.get()
+
+    # Data is collected a 5min intervals, when we're summing we must divide by that interval
+    interval_multipliter = 1
+    if aggregate_func is Aggregate.sum:
+        interval_multipliter = interval / 5
 
     date_histogram = []
     for bucket in results['aggregations']['times']['buckets']:
@@ -169,7 +180,7 @@ def get_es_history(fields, filters=None, interval='5m', aggregate_func=Aggregate
         }
 
         for field in fields:
-            date_bucket[field] = bucket[field]['value']
+            date_bucket[field] = bucket[field]['value'] / interval_multipliter
 
         date_histogram.append(date_bucket)
 
