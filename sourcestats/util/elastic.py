@@ -144,7 +144,7 @@ def get_es_terms(field_name, filters=None, size=None, index=settings.SERVERS_IND
 
 def get_es_history(
     fields, filters=None,
-    interval=DEFAULT_INTERVAL, aggregate_func=Aggregate.avg
+    interval=DEFAULT_INTERVAL, aggregate_func=Aggregate.avg, sum_divide=False
 ):
     fields = [fields] if isinstance(fields, basestring) else fields
 
@@ -170,7 +170,7 @@ def get_es_history(
 
     # Data is collected a 5min intervals, when we're summing we must divide by that interval
     interval_multipliter = 1
-    if aggregate_func is Aggregate.sum:
+    if sum_divide:
         interval_multipliter = interval / 5
 
     date_histogram = []

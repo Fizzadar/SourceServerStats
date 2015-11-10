@@ -67,7 +67,8 @@ def get_game_history(game_id):
     date_histogram = get_es_history(
         'player_count', filters,
         interval=get_request_interval(),
-        aggregate_func=Aggregate.sum
+        aggregate_func=Aggregate.sum,
+        sum_divide=True
     )
 
     return jsonify(players=date_histogram)
