@@ -20,7 +20,6 @@ const html = document.documentElement;
 
 
 class Servers extends React.Component {
-    loopLock = false
     searchBackoff = null
     serverFilters = {}
 
@@ -53,7 +52,10 @@ class Servers extends React.Component {
     componentDidUpdate() {
         const { query } = this.context.location;
 
-        if (query === null && _.keys(this.serverFilters).length > 0) {
+        if (
+            (_.keys(query).length === 0 || query === null)
+            && _.keys(this.serverFilters).length > 0
+        ) {
             this.serverFilters = {};
             this.filterServers();
         }
@@ -61,9 +63,6 @@ class Servers extends React.Component {
 
     startLoop() {
         this.loop = setInterval(() => {
-            if (this.loopLock)
-                return;
-
             const height = Math.max(
                 body.scrollHeight, body.offsetHeight,
                 html.clientHeight, html.scrollHeight, html.offsetHeight
@@ -80,7 +79,6 @@ class Servers extends React.Component {
     }
 
     filterServers() {
-        this.loopLock = true;
         this.props.filterServers(this.serverFilters);
     }
 
@@ -109,9 +107,6 @@ class Servers extends React.Component {
 
     render() {
         const { servers, totalServers, totalPlayers } = this.props.data;
-
-        // Allows the scroll checker to run
-        this.loopLock = false;
 
         let { query } = this.context.location;
         query = query || {};

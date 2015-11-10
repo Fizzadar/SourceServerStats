@@ -19,7 +19,6 @@ def index(_):
 
     if _js_file is None:
         js_dir = path.join(app.root_path, 'static', 'dist')
-        print js_dir
         # Find all .js files in dist, get first (should only be one) and strip the path
         js_file = glob(path.join(js_dir, '*.js'))[0]
         # Assign to the global

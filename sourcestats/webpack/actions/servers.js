@@ -32,7 +32,9 @@ var lock = false;
 export function fetchServers(filters = {}) {
     // If the fetch lock is on, return no action. The component will blindly call this.
     if (lock)
-        return {};
+        return {
+            type: 'NOWT'
+        };
 
     lock = true;
     let url = new URI('/api/v1/servers');

@@ -14,8 +14,9 @@ actions.fetchGames = fetchGames;
 import { fetchMaps } from '../actions/maps';
 actions.fetchMaps = fetchMaps;
 
-import { fetchServers } from '../actions/servers';
+import { fetchServers, filterServers } from '../actions/servers';
 actions.fetchServers = fetchServers;
+actions.filterServers = filterServers;
 
 import Graph from './shared/Graph';
 
@@ -26,12 +27,16 @@ class Global extends React.Component {
         fetchPlayerHistory: PropTypes.func.isRequired,
         fetchGames: PropTypes.func.isRequired,
         fetchMaps: PropTypes.func.isRequired,
+        filterServers: PropTypes.func.isRequired,
         fetchServers: PropTypes.func.isRequired
     }
 
     componentDidMount() {
         this.props.fetchGames({size: 1});
         this.props.fetchMaps({size: 1});
+
+        // Unfilter servers
+        this.props.filterServers();
         this.props.fetchServers({size: 0});
     }
 
