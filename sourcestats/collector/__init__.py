@@ -271,7 +271,7 @@ def _create_documents(host, port, stats):
     player_ratio = 0
 
     if info['max_players'] > 0:
-        players['player_count'] / info['max_players']
+        player_ratio = players['player_count'] / info['max_players']
 
     # These are always logged
     history_stats = {
