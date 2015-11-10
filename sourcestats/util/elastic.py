@@ -13,7 +13,7 @@ from .. import settings
 from .request import in_request_args
 
 ES_CLIENT = None
-DEFAULT_INTERVAL = 5
+DEFAULT_INTERVAL = settings.COLLECT_INTERVAL / 60
 
 
 def get_es_client():
@@ -64,12 +64,20 @@ def _delta(**kwargs):
 def get_request_interval():
     since = _get_since()
 
+    # If we're under a day, every 5 mins, like the collector
     if since >= _delta(days=1):
         return DEFAULT_INTERVAL
-    elif since >= _delta(days=7):
-        return 15
 
-    return 30
+    # If we're under one week, every 30m
+    elif since >= _delta(days=7):
+        return 30
+
+    # If we're under one month, every 2 hours
+    elif since >= _delta(days=30):
+        return 120
+
+    # Default a day
+    return 1440
 
 
 def get_request_filters():
