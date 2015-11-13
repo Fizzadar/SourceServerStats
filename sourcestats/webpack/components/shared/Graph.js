@@ -14,7 +14,8 @@ export const GRAPH_OPTIONS = {
     height: 200,
     full_width: true,
     right: 0,
-    show_secondary_x_label: false
+    show_secondary_x_label: false,
+    missing_is_hidden: true
 };
 
 
