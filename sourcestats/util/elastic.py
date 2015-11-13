@@ -73,7 +73,7 @@ def get_request_interval():
         return 30
 
     # If we're under one month, every 2 hours
-    elif since >= _delta(days=30):
+    elif since >= _delta(days=31):
         return 120
 
     # Default a day
