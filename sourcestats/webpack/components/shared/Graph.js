@@ -3,7 +3,6 @@
 // Desc: displays the graphs around the site
 
 import _ from 'lodash';
-import moment from 'moment';
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import MG from 'metrics-graphics';
@@ -26,7 +25,7 @@ export default class Graph extends React.Component {
     }
 
     filters = {
-        since: moment().utc().subtract(1, 'days').toISOString().split('.')[0]
+        since: '1d'
     }
 
     componentDidMount() {
@@ -47,18 +46,7 @@ export default class Graph extends React.Component {
     }
 
     setTimePeriod(period) {
-        let since = moment().utc();
-
-        if (period === '7-day') {
-            since = since.subtract(7, 'days');
-        } else if (period === '30-day') {
-            since = since.subtract(30, 'days');
-        } else {
-            since = since.subtract(1, 'days');
-        }
-
-        const iso = since.toISOString();
-        this.filters.since = iso.split('.')[0];
+        this.filters.since = period;
         this.fetchData();
     }
 
@@ -71,9 +59,9 @@ export default class Graph extends React.Component {
                     className='right'
                     onChange={(e) => this.setTimePeriod(e.target.value)}
                 >
-                    <option value='1-day' default>1 day</option>
-                    <option value='7-day'>7 days</option>
-                    <option value='30-day'>30 days</option>
+                    <option value='1d' default>1 day</option>
+                    <option value='7d'>7 days</option>
+                    <option value='30d'>30 days</option>
                 </select>
             </h3>
 

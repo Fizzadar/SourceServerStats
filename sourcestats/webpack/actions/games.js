@@ -7,7 +7,7 @@ import URI from 'URIjs';
 
 export const FETCH_GAMES = 'FETCH_GAMES';
 export const FETCH_GAME = 'FETCH_GAME';
-export const FETCH_GAME_TOP_MAPS = 'FETCH_GAME_TOP_MAPS';
+export const FETCH_GAME_MAPS = 'FETCH_GAME_MAPS';
 export const FETCH_GAME_PLAYER_HISTORY = 'FETCH_GAME_PLAYER_HISTORY';
 
 
@@ -47,13 +47,13 @@ export function fetchGame(gameId) {
 
 /** Fetches all maps seen on this server. */
 export function fetchGameMaps(gameId, filters ={}) {
-    const url = new URI(`/api/v1/game/${gameId}/top/maps`);
+    const url = new URI(`/api/v1/game/${gameId}/maps`);
 
     return dispatch => {
         fetch(url.query(filters))
         .then(response => response.json())
         .then(response => dispatch({
-            type: FETCH_GAME_TOP_MAPS,
+            type: FETCH_GAME_MAPS,
             maps: response.maps,
             total: response.total
         }));

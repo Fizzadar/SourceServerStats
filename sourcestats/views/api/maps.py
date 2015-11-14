@@ -5,9 +5,9 @@
 from flask import jsonify, request
 from elasticquery import Filter, Aggregate
 
-from ...app import app
-from ...util import get_source_apps
-from ...util.elastic import (
+from sourcestats.app import app
+from sourcestats.util import get_source_apps
+from sourcestats.util.elastic import (
     get_es_history, get_es_terms,
     get_request_filters, get_request_interval
 )

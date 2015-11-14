@@ -5,8 +5,10 @@
 from flask import jsonify
 from elasticquery import Aggregate
 
-from ...app import app
-from ...util.elastic import get_es_history, get_request_filters, get_request_interval
+from sourcestats.app import app
+from sourcestats.util.elastic import (
+    get_es_history, get_request_filters, get_request_interval
+)
 
 
 @app.route('/api/v1/history/servers')

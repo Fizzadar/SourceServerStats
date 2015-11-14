@@ -49,7 +49,7 @@ class Game extends React.Component {
 
             <div className='info'>
                 <ul className='split'>
-                    <li className='title'>{totalMaps.toLocaleString()} maps used with this game</li>
+                    <li className='title'>{totalMaps.toLocaleString()} maps playing this game</li>
 
                     {maps.map(name => <li key={name}>
                         <Link to={`/map/${name}`}>

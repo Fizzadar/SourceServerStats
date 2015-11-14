@@ -5,10 +5,9 @@
 from flask import jsonify, request
 from elasticquery import Filter, Aggregate
 
-from ... import settings
-from ...app import app
-from ...util import get_source_apps
-from ...util.elastic import (
+from sourcestats.app import app
+from sourcestats.util import get_source_apps
+from sourcestats.util.elastic import (
     get_es_history, get_es_terms,
     get_request_filters, get_request_interval
 )
@@ -17,6 +16,7 @@ from ...util.elastic import (
 @app.route('/api/v1/games')
 def get_games():
     '''List current games and the number of servers playing on them.'''
+
     games, total = get_es_terms(
         'game_id',
         filters=get_request_filters(),
@@ -36,22 +36,23 @@ def get_games():
 @app.route('/api/v1/game/<int:game_id>')
 def get_game(game_id):
     '''Gets details about a single game.'''
+
     apps = get_source_apps()
     name = apps.get(game_id, 'Unknown')
 
     return jsonify(name=name, id=game_id)
 
 
-@app.route('/api/v1/game/<int:game_id>/top/maps')
-def get_game_top_maps(game_id):
-    '''Returns a list of the top maps we've seen on this server.'''
+@app.route('/api/v1/game/<int:game_id>/maps')
+def get_game_maps(game_id):
+    '''Returns a list of the maps currently being played with this game.'''
+
     filters = get_request_filters()
     filters.append(Filter.term('game_id', game_id))
 
     maps, total = get_es_terms(
         'map',
         filters=filters,
-        index=settings.HISTORY_INDEXES,
         size=request.args.get('size')
     )
 
@@ -61,6 +62,7 @@ def get_game_top_maps(game_id):
 @app.route('/api/v1/game/<int:game_id>/history/players')
 def get_game_history(game_id):
     '''Returns a date histogram of players on this game.'''
+
     filters = get_request_filters()
     filters.append(Filter.term('game_id', game_id))
 

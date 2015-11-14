@@ -7,13 +7,17 @@ from datetime import datetime, timedelta
 from flask import request, g
 from elasticsearch import Elasticsearch
 from elasticquery import ElasticQuery, Aggregate, Filter
-from dateutil.parser import parse as parse_date
 
-from .. import settings
+from sourcestats import settings
+
 from .request import in_request_args
 
 ES_CLIENT = None
 DEFAULT_INTERVAL = settings.COLLECT_INTERVAL / 60
+SINCE_INTERVALS = {
+    'd': 'days',
+    'h': 'hours'
+}
 
 
 def get_es_client():
@@ -41,10 +45,16 @@ def _get_since():
 
     # Attempt to parse any since
     if in_request_args('since'):
-        try:
-            since = parse_date(request.args['since'])
-        except ValueError:
-            pass
+        interval = request.args['since'][-1]
+
+        if interval in SINCE_INTERVALS:
+            try:
+                value = int(request.args['since'][0:-1])
+                since = datetime.utcnow() - timedelta(**{
+                    SINCE_INTERVALS[interval]: value
+                })
+            except ValueError:
+                pass
 
     # Default to a day
     if since is None:
@@ -58,22 +68,22 @@ def _get_since():
     return since
 
 
-def _delta(**kwargs):
+def _past_time(**kwargs):
     return (datetime.utcnow() - timedelta(**kwargs)).replace(microsecond=0)
 
 def get_request_interval():
     since = _get_since()
 
     # If we're under a day, every 5 mins, like the collector
-    if since >= _delta(days=1):
+    if since >= _past_time(days=1):
         return DEFAULT_INTERVAL
 
     # If we're under one week, every 30m
-    elif since >= _delta(days=7):
+    elif since >= _past_time(days=7):
         return 30
 
     # If we're under one month, every 2 hours
-    elif since >= _delta(days=31):
+    elif since >= _past_time(days=31):
         return 120
 
     # Default a day

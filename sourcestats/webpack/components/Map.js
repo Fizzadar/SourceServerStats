@@ -30,7 +30,7 @@ class Map extends React.Component {
 
             <div className='info'>
                 <ul className='split'>
-                    <li className='title'>{map.games.length.toLocaleString()} games this map has appeared in</li>
+                    <li className='title'>{map.games.length.toLocaleString()} games playing this map</li>
                     {map.games.map(game => <li key={game}>
                         <Link to={`/game/${game[0][0]}`}>
                             {game[0][1]}

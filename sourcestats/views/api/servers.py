@@ -8,10 +8,10 @@ from flask import request, jsonify
 from elasticquery import Filter, Query, Aggregate
 from elasticsearch.exceptions import NotFoundError
 
-from ... import settings
-from ...app import app
-from ...util import api_abort, get_source_apps
-from ...util.elastic import (
+from sourcestats import settings
+from sourcestats.app import app
+from sourcestats.util import api_abort, get_source_apps
+from sourcestats.util.elastic import (
     get_es_query, get_es_client, get_request_filters,
     get_es_history, get_es_terms, get_request_interval
 )

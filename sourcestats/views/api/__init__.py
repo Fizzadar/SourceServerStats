@@ -4,8 +4,8 @@
 
 from flask import jsonify
 
-from ...app import app
-from ...util.elastic import get_es_terms, get_request_filters
+from sourcestats.app import app
+from sourcestats.util.elastic import get_es_terms, get_request_filters
 
 
 @app.route('/api')

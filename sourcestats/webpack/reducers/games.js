@@ -4,7 +4,7 @@
 
 import {
     FETCH_GAMES, FETCH_GAME,
-    FETCH_GAME_TOP_MAPS,
+    FETCH_GAME_MAPS,
     FETCH_GAME_PLAYER_HISTORY
 } from '../actions/games';
 
@@ -61,7 +61,7 @@ export function game(state = initialGameState, action) {
             state.data.playerHistory = parseDates(action.players, 'player_count');
             break;
 
-        case FETCH_GAME_TOP_MAPS:
+        case FETCH_GAME_MAPS:
             state.data.maps = action.maps;
             state.data.totalMaps = action.total;
             break;

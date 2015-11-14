@@ -32,6 +32,7 @@ class Global extends React.Component {
     }
 
     componentDidMount() {
+        // We use size=1 because we don't actually want the list, just the total
         this.props.fetchGames({size: 1});
         this.props.fetchMaps({size: 1});
 
