@@ -27,6 +27,8 @@ def build_webpack(data, state):
         logger.info('Building webpack...')
         local.shell('''
             rm -rf sourcestats/static/dist/ && \
+            npm prune && \
+            npm install --quiet && \
             grunt build
         ''')
 
