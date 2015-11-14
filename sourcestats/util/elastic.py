@@ -198,7 +198,7 @@ def get_es_history(
         }
 
         for field in fields:
-            date_bucket[field] = bucket[field]['value'] / interval_multipliter
+            date_bucket[field] = round(bucket[field]['value'] / interval_multipliter)
 
         date_histogram.append(date_bucket)
 
